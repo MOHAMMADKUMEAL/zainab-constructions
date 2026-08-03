@@ -14,6 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedExpensesRouteImport } from './routes/_authenticated/expenses'
+import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
+import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects.index'
 import { Route as AuthenticatedProjectsIdRouteImport } from './routes/_authenticated/projects.$id'
 
@@ -41,6 +43,16 @@ const AuthenticatedExpensesRoute = AuthenticatedExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProjectsIndexRoute =
   AuthenticatedProjectsIndexRouteImport.update({
     id: '/projects/',
@@ -58,6 +70,8 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/expenses': typeof AuthenticatedExpensesRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
+  '/search': typeof AuthenticatedSearchRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
 }
@@ -66,6 +80,8 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/expenses': typeof AuthenticatedExpensesRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
+  '/search': typeof AuthenticatedSearchRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
 }
@@ -76,15 +92,32 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/expenses': typeof AuthenticatedExpensesRoute
+  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
+  '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/projects/$id': typeof AuthenticatedProjectsIdRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/dashboard' | '/expenses' | '/projects/$id' | '/projects/'
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/expenses'
+    | '/payments'
+    | '/search'
+    | '/projects/$id'
+    | '/projects/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/expenses' | '/projects/$id' | '/projects'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/expenses'
+    | '/payments'
+    | '/search'
+    | '/projects/$id'
+    | '/projects'
   id:
     | '__root__'
     | '/'
@@ -92,6 +125,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/expenses'
+    | '/_authenticated/payments'
+    | '/_authenticated/search'
     | '/_authenticated/projects/$id'
     | '/_authenticated/projects/'
   fileRoutesById: FileRoutesById
@@ -139,6 +174,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExpensesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/payments': {
+      id: '/_authenticated/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/search': {
+      id: '/_authenticated/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof AuthenticatedSearchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/projects/': {
       id: '/_authenticated/projects/'
       path: '/projects'
@@ -159,6 +208,8 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedExpensesRoute: typeof AuthenticatedExpensesRoute
+  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
+  AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedProjectsIdRoute: typeof AuthenticatedProjectsIdRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
 }
@@ -166,6 +217,8 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedExpensesRoute: AuthenticatedExpensesRoute,
+  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
+  AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedProjectsIdRoute: AuthenticatedProjectsIdRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
 }
