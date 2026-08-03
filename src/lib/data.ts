@@ -90,7 +90,7 @@ type Table = "projects" | "expenses" | "payments" | "project_notes";
 export function useSaveRow<T>(table: Table, labels: { created: string; updated: string }) {
   const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: async ({ id, values }: { id?: string; values: Insert<T> }) => {
+    mutationFn: async ({ id, values }: { id?: string | undefined; values: Insert<T> }) => {
       if (id) {
         const { error } = await supabase.from(table).update(values as never).eq("id", id);
         if (error) throw error;
