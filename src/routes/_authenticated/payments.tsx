@@ -21,9 +21,9 @@ import { PAYMENT_METHODS, formatDate, formatMoney, methodLabel, sum, type Paymen
 export const Route = createFileRoute("/_authenticated/payments")({
   head: () => ({
     meta: [
-      { title: "Payments — SiteLedger" },
+      { title: "Payments — Zainab Constructions" },
       { name: "description", content: "Client payments received across all construction projects." },
-      { property: "og:title", content: "Payments — SiteLedger" },
+      { property: "og:title", content: "Payments — Zainab Constructions" },
       { property: "og:description", content: "Track received amounts and remaining balances by project." },
     ],
   }),

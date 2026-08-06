@@ -79,12 +79,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SiteLedger — Construction Project Manager" },
+      { title: "Zainab Constructions — Construction Project Manager" },
       {
         name: "description",
         content: "Track construction projects, site expenses and client payments in one simple workspace.",
       },
-      { property: "og:title", content: "SiteLedger — Construction Project Manager" },
+      { property: "og:title", content: "Zainab Constructions — Construction Project Manager" },
       {
         property: "og:description",
         content: "Track construction projects, site expenses and client payments in one simple workspace.",

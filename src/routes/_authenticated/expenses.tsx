@@ -22,9 +22,9 @@ import { EXPENSE_CATEGORIES, categoryLabel, formatDate, formatMoney, sum, type E
 export const Route = createFileRoute("/_authenticated/expenses")({
   head: () => ({
     meta: [
-      { title: "Expenses — SiteLedger" },
+      { title: "Expenses — Zainab Constructions" },
       { name: "description", content: "Search and filter every construction site expense by category and date." },
-      { property: "og:title", content: "Expenses — SiteLedger" },
+      { property: "og:title", content: "Expenses — Zainab Constructions" },
       { property: "og:description", content: "All site spending across projects, filterable by category and date." },
     ],
   }),

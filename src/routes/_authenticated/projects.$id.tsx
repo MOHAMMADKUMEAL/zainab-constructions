@@ -51,9 +51,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/projects/$id")({
   head: () => ({
     meta: [
-      { title: "Project details — SiteLedger" },
+      { title: "Project details — Zainab Constructions" },
       { name: "description", content: "Budget, expenses, payments and notes for a single construction project." },
-      { property: "og:title", content: "Project details — SiteLedger" },
+      { property: "og:title", content: "Project details — Zainab Constructions" },
       { property: "og:description", content: "Full financial picture for one construction project." },
     ],
   }),

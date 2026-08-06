@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SiteLedger — Construction Project & Expense Manager" },
+      { title: "Zainab Constructions — Construction Project & Expense Manager" },
       {
         name: "description",
         content:
           "Track construction projects, site expenses and client payments in rupees with a simple, private dashboard.",
       },
-      { property: "og:title", content: "SiteLedger — Construction Project Manager" },
+      { property: "og:title", content: "Zainab Constructions — Construction Project Manager" },
       {
         property: "og:description",
         content: "Projects, expenses and client payments in one clean dashboard.",
@@ -43,7 +43,7 @@ function Landing() {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-accent-foreground">
             <HardHat className="h-5 w-5" />
           </span>
-          <span className="font-display font-semibold">SiteLedger</span>
+          <span className="font-display font-semibold">Zainab Constructions</span>
         </span>
         <Button asChild variant="outline" size="sm">
           <Link to={signedIn ? "/dashboard" : "/auth"}>{signedIn ? "Open dashboard" : "Sign in"}</Link>

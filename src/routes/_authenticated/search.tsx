@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/search")({
   }),
   head: () => ({
     meta: [
-      { title: "Search — SiteLedger" },
+      { title: "Search — Zainab Constructions" },
       { name: "description", content: "Search across construction projects, clients and expenses." },
-      { property: "og:title", content: "Search — SiteLedger" },
+      { property: "og:title", content: "Search — Zainab Constructions" },
       { property: "og:description", content: "Find any project, client or expense instantly." },
     ],
   }),

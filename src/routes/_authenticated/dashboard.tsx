@@ -46,9 +46,9 @@ import {
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — SiteLedger" },
+      { title: "Dashboard — Zainab Constructions" },
       { name: "description", content: "Budgets, expenses, payments and balance across all your construction projects." },
-      { property: "og:title", content: "Dashboard — SiteLedger" },
+      { property: "og:title", content: "Dashboard — Zainab Constructions" },
       { property: "og:description", content: "Live totals for every construction project you run." },
     ],
   }),
