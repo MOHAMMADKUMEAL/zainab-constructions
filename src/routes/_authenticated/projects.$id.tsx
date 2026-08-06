@@ -204,6 +204,9 @@ function ProjectDetailPage() {
               ) : null}
             </CardContent>
           </Card>
+          <div className="mt-4">
+            <ProjectMap address={project.location ?? ""} title={project.project_name} />
+          </div>
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4 space-y-4">
