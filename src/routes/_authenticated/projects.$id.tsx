@@ -20,6 +20,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ExpenseDialog } from "@/components/expense-dialog";
 import { PaymentDialog } from "@/components/payment-dialog";
 import { ProjectDialog } from "@/components/project-dialog";
+import { ScreenshotLink } from "@/components/screenshot-link";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -291,6 +292,7 @@ function ProjectDetailPage() {
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <span className="text-sm font-semibold text-success">{formatMoney(p.amount)}</span>
+                      <ScreenshotLink path={p.screenshot_path} />
                       <Button
                         variant="ghost"
                         size="icon"

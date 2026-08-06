@@ -4,6 +4,7 @@ import { Download, Pencil, Plus, Search, Trash2, Wallet } from "lucide-react";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { EmptyState } from "@/components/empty-state";
 import { PaymentDialog } from "@/components/payment-dialog";
+import { ScreenshotLink } from "@/components/screenshot-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -133,6 +134,7 @@ function PaymentsPage() {
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <span className="text-sm font-semibold text-success">{formatMoney(p.amount)}</span>
+                  <ScreenshotLink path={p.screenshot_path} />
                   <Button
                     variant="ghost"
                     size="icon"
