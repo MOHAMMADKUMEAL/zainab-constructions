@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Pencil, Plus, Search, Trash2, Wallet } from "lucide-react";
+import { Download, Pencil, Plus, Search, Trash2, Wallet } from "lucide-react";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { EmptyState } from "@/components/empty-state";
 import { PaymentDialog } from "@/components/payment-dialog";
@@ -17,6 +17,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDeleteRow, usePayments, useProjects } from "@/lib/data";
 import { PAYMENT_METHODS, formatDate, formatMoney, methodLabel, sum, type Payment } from "@/lib/domain";
+import { downloadPaymentsPdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/payments")({
   head: () => ({
@@ -63,14 +64,23 @@ function PaymentsPage() {
             {filtered.length} entries · {formatMoney(sum(filtered))} received
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4" /> Add payment
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => downloadPaymentsPdf(filtered, projectName)}
+            disabled={filtered.length === 0}
+          >
+            <Download className="h-4 w-4" /> PDF
+          </Button>
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" /> Add payment
+          </Button>
+        </div>
       </div>
 
       <Card className="rounded-2xl shadow-card">
