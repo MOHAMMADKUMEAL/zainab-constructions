@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Pencil, Plus, Search, Trash2, Wallet } from "lucide-react";
+import { Download, Pencil, Plus, Search, Trash2, Wallet } from "lucide-react";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { EmptyState } from "@/components/empty-state";
 import { PaymentDialog } from "@/components/payment-dialog";
+import { ScreenshotLink } from "@/components/screenshot-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,13 +18,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDeleteRow, usePayments, useProjects } from "@/lib/data";
 import { PAYMENT_METHODS, formatDate, formatMoney, methodLabel, sum, type Payment } from "@/lib/domain";
+import { downloadPaymentsPdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/payments")({
   head: () => ({
     meta: [
-      { title: "Payments — SiteLedger" },
+      { title: "Payments — Zainab Constructions" },
       { name: "description", content: "Client payments received across all construction projects." },
-      { property: "og:title", content: "Payments — SiteLedger" },
+      { property: "og:title", content: "Payments — Zainab Constructions" },
       { property: "og:description", content: "Track received amounts and remaining balances by project." },
     ],
   }),
@@ -63,14 +65,23 @@ function PaymentsPage() {
             {filtered.length} entries · {formatMoney(sum(filtered))} received
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4" /> Add payment
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => downloadPaymentsPdf(filtered, projectName)}
+            disabled={filtered.length === 0}
+          >
+            <Download className="h-4 w-4" /> PDF
+          </Button>
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" /> Add payment
+          </Button>
+        </div>
       </div>
 
       <Card className="rounded-2xl shadow-card">
@@ -123,6 +134,7 @@ function PaymentsPage() {
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <span className="text-sm font-semibold text-success">{formatMoney(p.amount)}</span>
+                  <ScreenshotLink path={p.screenshot_path} />
                   <Button
                     variant="ghost"
                     size="icon"

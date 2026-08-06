@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Loader2, Paperclip, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 import { useProjects, useSaveRow } from "@/lib/data";
 import { PAYMENT_METHODS, type Payment, type PaymentMethod } from "@/lib/domain";
 
@@ -37,6 +40,8 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(today());
   const [notes, setNotes] = useState("");
+  const [screenshotPath, setScreenshotPath] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const save = useSaveRow<Payment>("payments", {
     created: "Payment recorded",
@@ -50,7 +55,27 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
     setAmount(payment ? String(payment.amount) : "");
     setDate(payment?.payment_date ?? today());
     setNotes(payment?.notes ?? "");
+    setScreenshotPath(payment?.screenshot_path ?? "");
   }, [open, payment, defaultProjectId]);
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      if (!userId) throw new Error("You must be signed in");
+      const ext = file.name.split(".").pop() ?? "png";
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("payment-screenshots").upload(path, file);
+      if (error) throw error;
+      setScreenshotPath(path);
+      toast.success("Screenshot attached");
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +89,7 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
           payment_method: method,
           payment_date: date,
           notes,
+          screenshot_path: screenshotPath,
         },
       },
       { onSuccess: () => onOpenChange(false) },
@@ -72,7 +98,7 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{payment ? "Edit payment" : "Record payment"}</DialogTitle>
           <DialogDescription>Log money received from the client.</DialogDescription>
@@ -131,6 +157,44 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="payment-screenshot">Payment screenshot (optional)</Label>
+            {screenshotPath ? (
+              <div className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm">
+                <span className="flex min-w-0 items-center gap-2">
+                  <Paperclip className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{screenshotPath.split("/").pop()}</span>
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Remove screenshot"
+                  onClick={() => setScreenshotPath("")}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ) : (
+              <Input
+                id="payment-screenshot"
+                type="file"
+                accept="image/*"
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void upload(file);
+                }}
+              />
+            )}
+            {uploading ? (
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" /> Uploading…
+              </p>
+            ) : null}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="payment-notes">Notes</Label>
             <Textarea
@@ -144,7 +208,7 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={save.isPending || !projectId}>
+            <Button type="submit" disabled={save.isPending || uploading || !projectId}>
               {save.isPending ? "Saving…" : payment ? "Save changes" : "Record payment"}
             </Button>
           </DialogFooter>

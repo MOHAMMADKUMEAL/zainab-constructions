@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { HardHat, LayoutDashboard, Receipt, FolderKanban, Wallet } from "lucide-react";
+import { HardHat, Landmark, LayoutDashboard, Receipt, FolderKanban, Wallet } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ const items = [
   { title: "Projects", url: "/projects", icon: FolderKanban },
   { title: "Expenses", url: "/expenses", icon: Receipt },
   { title: "Payments", url: "/payments", icon: Wallet },
+  { title: "Investments", url: "/investments", icon: Landmark },
 ] as const;
 
 export function AppSidebar() {
@@ -34,7 +35,7 @@ export function AppSidebar() {
           </span>
           {!collapsed && (
             <span className="font-display text-sm font-semibold leading-tight">
-              SiteLedger
+              Zainab Constructions
               <span className="block text-xs font-normal text-muted-foreground">
                 Construction manager
               </span>

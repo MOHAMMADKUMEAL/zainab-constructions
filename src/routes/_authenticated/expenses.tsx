@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Pencil, Plus, Receipt, Search, Trash2 } from "lucide-react";
+import { Download, Pencil, Plus, Receipt, Search, Trash2 } from "lucide-react";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { EmptyState } from "@/components/empty-state";
 import { ExpenseDialog } from "@/components/expense-dialog";
@@ -18,13 +18,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDeleteRow, useExpenses, useProjects } from "@/lib/data";
 import { EXPENSE_CATEGORIES, categoryLabel, formatDate, formatMoney, sum, type Expense } from "@/lib/domain";
+import { downloadExpensesPdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/expenses")({
   head: () => ({
     meta: [
-      { title: "Expenses — SiteLedger" },
+      { title: "Expenses — Zainab Constructions" },
       { name: "description", content: "Search and filter every construction site expense by category and date." },
-      { property: "og:title", content: "Expenses — SiteLedger" },
+      { property: "og:title", content: "Expenses — Zainab Constructions" },
       { property: "og:description", content: "All site spending across projects, filterable by category and date." },
     ],
   }),
@@ -68,14 +69,23 @@ function ExpensesPage() {
             {filtered.length} entries · {formatMoney(sum(filtered))}
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4" /> Add expense
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => downloadExpensesPdf(filtered, projectName)}
+            disabled={filtered.length === 0}
+          >
+            <Download className="h-4 w-4" /> PDF
+          </Button>
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" /> Add expense
+          </Button>
+        </div>
       </div>
 
       <Card className="rounded-2xl shadow-card">

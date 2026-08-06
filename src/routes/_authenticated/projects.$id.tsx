@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   ArrowLeft,
   CalendarDays,
+  Download,
   MapPin,
   Pencil,
   Phone,
@@ -19,6 +20,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ExpenseDialog } from "@/components/expense-dialog";
 import { PaymentDialog } from "@/components/payment-dialog";
 import { ProjectDialog } from "@/components/project-dialog";
+import { ScreenshotLink } from "@/components/screenshot-link";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,13 +49,15 @@ import {
   type ProjectNote,
 } from "@/lib/domain";
 import { cn } from "@/lib/utils";
+import { ProjectMap } from "@/components/project-map";
+import { downloadProjectSummaryPdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/projects/$id")({
   head: () => ({
     meta: [
-      { title: "Project details — SiteLedger" },
+      { title: "Project details — Zainab Constructions" },
       { name: "description", content: "Budget, expenses, payments and notes for a single construction project." },
-      { property: "og:title", content: "Project details — SiteLedger" },
+      { property: "og:title", content: "Project details — Zainab Constructions" },
       { property: "og:description", content: "Full financial picture for one construction project." },
     ],
   }),
@@ -148,9 +152,17 @@ function ProjectDetailPage() {
             </span>
           </div>
         </div>
-        <Button variant="outline" onClick={() => setEditOpen(true)}>
-          <Pencil className="h-4 w-4" /> Edit
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => downloadProjectSummaryPdf(project, expenses, payments)}
+          >
+            <Download className="h-4 w-4" /> Summary PDF
+          </Button>
+          <Button variant="outline" onClick={() => setEditOpen(true)}>
+            <Pencil className="h-4 w-4" /> Edit
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -193,6 +205,9 @@ function ProjectDetailPage() {
               ) : null}
             </CardContent>
           </Card>
+          <div className="mt-4">
+            <ProjectMap address={project.location ?? ""} title={project.project_name} />
+          </div>
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4 space-y-4">
@@ -277,6 +292,7 @@ function ProjectDetailPage() {
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
                       <span className="text-sm font-semibold text-success">{formatMoney(p.amount)}</span>
+                      <ScreenshotLink path={p.screenshot_path} />
                       <Button
                         variant="ghost"
                         size="icon"

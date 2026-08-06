@@ -13,13 +13,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — SiteLedger Construction Manager" },
+      { title: "Sign in — Zainab Constructions Construction Manager" },
       {
         name: "description",
         content:
-          "Sign in to SiteLedger to manage construction projects, site expenses and client payments.",
+          "Sign in to Zainab Constructions to manage construction projects, site expenses and client payments.",
       },
-      { property: "og:title", content: "Sign in — SiteLedger" },
+      { property: "og:title", content: "Sign in — Zainab Constructions" },
       { property: "og:description", content: "Access your construction projects, expenses and payments." },
     ],
   }),
@@ -85,7 +85,7 @@ function AuthPage() {
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent text-accent-foreground">
             <HardHat className="h-5 w-5" />
           </span>
-          <span className="font-display text-lg font-semibold">SiteLedger</span>
+          <span className="font-display text-lg font-semibold">Zainab Constructions</span>
         </Link>
 
         <Card className="rounded-2xl shadow-card">

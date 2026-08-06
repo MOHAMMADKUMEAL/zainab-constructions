@@ -1,7 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Expense, Payment, Project, ProjectNote } from "./domain";
+import type {
+  Expense,
+  Investment,
+  InvestmentInvestor,
+  Payment,
+  Project,
+  ProjectNote,
+} from "./domain";
 
 type Insert<T> = Partial<T> & Record<string, unknown>;
 
@@ -73,6 +80,34 @@ export function useProjectNotes(projectId: string) {
   });
 }
 
+export function useInvestments() {
+  return useQuery({
+    queryKey: ["investments"],
+    queryFn: async (): Promise<Investment[]> => {
+      const { data, error } = await supabase
+        .from("investments")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useInvestmentInvestors() {
+  return useQuery({
+    queryKey: ["investment_investors"],
+    queryFn: async (): Promise<InvestmentInvestor[]> => {
+      const { data, error } = await supabase
+        .from("investment_investors")
+        .select("*")
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 /* --------------------------------- writes --------------------------------- */
 
 function useInvalidate() {
@@ -82,10 +117,18 @@ function useInvalidate() {
     qc.invalidateQueries({ queryKey: ["expenses"] });
     qc.invalidateQueries({ queryKey: ["payments"] });
     qc.invalidateQueries({ queryKey: ["project_notes"] });
+    qc.invalidateQueries({ queryKey: ["investments"] });
+    qc.invalidateQueries({ queryKey: ["investment_investors"] });
   };
 }
 
-type Table = "projects" | "expenses" | "payments" | "project_notes";
+type Table =
+  | "projects"
+  | "expenses"
+  | "payments"
+  | "project_notes"
+  | "investments"
+  | "investment_investors";
 
 export function useSaveRow<T>(table: Table, labels: { created: string; updated: string }) {
   const invalidate = useInvalidate();
