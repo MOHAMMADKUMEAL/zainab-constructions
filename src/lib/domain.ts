@@ -4,6 +4,8 @@ export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Expense = Database["public"]["Tables"]["expenses"]["Row"];
 export type Payment = Database["public"]["Tables"]["payments"]["Row"];
 export type ProjectNote = Database["public"]["Tables"]["project_notes"]["Row"];
+export type Investment = Database["public"]["Tables"]["investments"]["Row"];
+export type InvestmentInvestor = Database["public"]["Tables"]["investment_investors"]["Row"];
 
 export type ProjectStatus = Database["public"]["Enums"]["project_status"];
 export type ExpenseCategory = Database["public"]["Enums"]["expense_category"];
@@ -19,6 +21,8 @@ export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
 export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "material", label: "Material" },
   { value: "labour", label: "Labour" },
+  { value: "goundi", label: "Goundi" },
+  { value: "shentring_mestri", label: "Shentring Mestri" },
   { value: "plumber", label: "Plumber" },
   { value: "electrician", label: "Electrician" },
   { value: "painter", label: "Painter" },
