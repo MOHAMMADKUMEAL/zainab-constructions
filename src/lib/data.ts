@@ -1,7 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Expense, Payment, Project, ProjectNote } from "./domain";
+import type {
+  Expense,
+  Investment,
+  InvestmentInvestor,
+  Payment,
+  Project,
+  ProjectNote,
+} from "./domain";
 
 type Insert<T> = Partial<T> & Record<string, unknown>;
 
