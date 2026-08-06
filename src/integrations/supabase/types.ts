@@ -55,6 +55,80 @@ export type Database = {
           },
         ]
       }
+      investment_investors: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          investment_id: string
+          investor_name: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          investment_id: string
+          investor_name: string
+          user_id?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          investment_id?: string
+          investor_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_investors_investment_id_fkey"
+            columns: ["investment_id"]
+            isOneToOne: false
+            referencedRelation: "investments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investments: {
+        Row: {
+          created_at: string
+          id: string
+          location: string
+          notes: string
+          purchase_amount: number
+          purchase_date: string | null
+          sold_amount: number | null
+          sold_date: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string
+          notes?: string
+          purchase_amount?: number
+          purchase_date?: string | null
+          sold_amount?: number | null
+          sold_date?: string | null
+          title: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string
+          notes?: string
+          purchase_amount?: number
+          purchase_date?: string | null
+          sold_amount?: number | null
+          sold_date?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -64,6 +138,7 @@ export type Database = {
           payment_date: string
           payment_method: Database["public"]["Enums"]["payment_method"]
           project_id: string
+          screenshot_path: string
           user_id: string
         }
         Insert: {
@@ -74,6 +149,7 @@ export type Database = {
           payment_date?: string
           payment_method?: Database["public"]["Enums"]["payment_method"]
           project_id: string
+          screenshot_path?: string
           user_id?: string
         }
         Update: {
@@ -84,6 +160,7 @@ export type Database = {
           payment_date?: string
           payment_method?: Database["public"]["Enums"]["payment_method"]
           project_id?: string
+          screenshot_path?: string
           user_id?: string
         }
         Relationships: [
@@ -187,6 +264,8 @@ export type Database = {
         | "tiles"
         | "transport"
         | "other"
+        | "goundi"
+        | "shentring_mestri"
       payment_method: "cash" | "upi" | "bank_transfer" | "cheque"
       project_status: "planning" | "running" | "completed" | "on_hold"
     }
@@ -325,6 +404,8 @@ export const Constants = {
         "tiles",
         "transport",
         "other",
+        "goundi",
+        "shentring_mestri",
       ],
       payment_method: ["cash", "upi", "bank_transfer", "cheque"],
       project_status: ["planning", "running", "completed", "on_hold"],
