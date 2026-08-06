@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   ArrowLeft,
   CalendarDays,
+  Download,
   MapPin,
   Pencil,
   Phone,
@@ -47,6 +48,8 @@ import {
   type ProjectNote,
 } from "@/lib/domain";
 import { cn } from "@/lib/utils";
+import { ProjectMap } from "@/components/project-map";
+import { downloadProjectSummaryPdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/projects/$id")({
   head: () => ({
@@ -148,9 +151,17 @@ function ProjectDetailPage() {
             </span>
           </div>
         </div>
-        <Button variant="outline" onClick={() => setEditOpen(true)}>
-          <Pencil className="h-4 w-4" /> Edit
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => downloadProjectSummaryPdf(project, expenses, payments)}
+          >
+            <Download className="h-4 w-4" /> Summary PDF
+          </Button>
+          <Button variant="outline" onClick={() => setEditOpen(true)}>
+            <Pencil className="h-4 w-4" /> Edit
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
