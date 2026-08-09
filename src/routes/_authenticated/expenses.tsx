@@ -149,15 +149,18 @@ function ExpensesPage() {
         <Card className="rounded-2xl shadow-card">
           <CardContent className="divide-y divide-border p-0">
             {filtered.map((e) => (
-              <div key={e.id} className="flex items-center justify-between gap-3 p-4">
-                <div className="min-w-0">
+              <div
+                key={e.id}
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-4"
+              >
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{e.description || categoryLabel(e.category)}</p>
                   <p className="truncate text-xs text-muted-foreground">
                     {projectName(e.project_id)} · {categoryLabel(e.category)} · {formatDate(e.expense_date)}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <span className="text-sm font-semibold">{formatMoney(e.amount)}</span>
+                  <span className="mr-1 text-sm font-semibold tabular-nums">{formatMoney(e.amount)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
