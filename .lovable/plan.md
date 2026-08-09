@@ -1,49 +1,62 @@
-# Plan: In-App Data Manager & Safety Center
+# Plan: Portfolio site, dark-theme fixes, PDF totals
 
-You asked how to see database entries, manage them, and keep data safe. This plan adds a single "Data & Safety" screen inside Zainab Constructions so you can browse every record you own and export/back it up without leaving the app.
+## 1. Date fields invisible in dark theme
 
-## What we'll build
+All date pickers use native `<input type="date">`. In dark mode the browser's calendar icon renders black on a dark background.
 
-1. **New "Data & Safety" page** (`/_authenticated/data-safety`)
-   - Tabbed data browser: Projects, Expenses, Payments, Investments, Investors.
-   - Each tab shows a searchable/sortable table with key fields.
-   - Inline row actions: edit (opens existing dialog) and delete (with confirmation).
-   - Read-only safety panel showing:
-     - Authentication status.
-     - Row Level Security (RLS) summary: "Each user only sees their own records."
-     - Storage bucket status for payment screenshots.
-     - Last backup/export timestamp.
+- Add a dark-mode rule in `src/styles.css` that inverts the native calendar picker indicator (`::-webkit-calendar-picker-indicator`) and sets `color-scheme: dark` on the root when dark is active, so the popup calendar itself also renders dark.
+- Affects: project, expense, payment, investment dialogs and the expenses date-range filters — no per-file changes needed.
 
-2. **Export & backup controls**
-   - "Export as CSV" button on every tab.
-   - "Download full backup" button that zips all five tables into CSV files in the browser.
-   - Uses client-side data already fetched by React Query — no extra server dependency.
+## 2. Expenses page padding
 
-3. **Navigation**
-   - Add "Data & Safety" to the app sidebar, grouped under Manage.
+- Rework `src/routes/_authenticated/expenses.tsx` spacing to match the Payments page: consistent card padding, aligned filter grid, even row padding and gaps on mobile and desktop.
 
-4. **Safety hardening (no schema changes)**
-   - Verify existing RLS policies are intact.
-   - Add a client-side reminder to use a strong password / Google sign-in.
-   - Keep all data access through authenticated Supabase client so RLS is enforced.
+## 3. PDF totals
 
-## Out of scope
+In `src/lib/pdf.ts`:
+- Expenses report: add a bold total row at the end of the table plus a summary line ("Total expenses").
+- Payments report: same, with "Total payments received".
+- Project summary: add a clear totals block showing total expenses, total payments received, and balance, and a total row under each of the two tables.
 
-- No new database tables or migrations.
-- No admin access to other users' data (RLS prevents this by design).
-- No automated cloud backups (Lovable Cloud handles infrastructure backups; this gives you manual CSV exports).
+## 4. Yellow profile icon — where to change it
 
-## Files to create / modify
+The yellow square with the hard-hat icon is the brand mark, defined in two places:
 
-- Create `src/routes/_authenticated/data-safety.tsx`
-- Create `src/components/data-table.tsx` (reusable searchable table)
-- Create `src/lib/export-csv.ts` (CSV generation helper)
-- Modify `src/components/app-sidebar.tsx` (add nav item)
-- Modify `src/lib/domain.ts` if needed for export helpers
+- `src/components/app-sidebar.tsx` (line ~34): `<span class="... bg-accent ..."><HardHat /></span>`
+- `src/routes/index.tsx` (header, line ~43): same markup
+
+To use a personal/company image, replace that span's icon with an `<img>` pointing at an uploaded asset. I'll wire the logo from your visiting card as a CDN asset and use it in both places, so the yellow block is gone.
+
+## 5. Public portfolio website (before sign-up)
+
+Replace the current landing page (`src/routes/index.tsx`) with a proper company portfolio, keeping the dashboard and everything behind sign-in exactly as it is. Details taken from your visiting card:
+
+- **Company:** Zainab Construction & Real Estate
+- **Services:** Building Contractor | House / Plot / Land — Sell or Purchase
+- **Contacts:** Arfat Hanchanmani — +91 96321 69834; Tousif Shaikh — +91 98450 73900
+- **Address:** Plot No. 37, Sy No. 55/3/3b, Siddeshwar Nagar, Bauxite Road, Near Razaye Mustafa Colony, Po: Nehru Nagar, Belagavi - 590 010
+
+Sections:
+1. Hero with logo, tagline, and call buttons (tap-to-call `tel:` links).
+2. About the company.
+3. Services grid (contracting, house construction, plot/land sale & purchase).
+4. Demo works gallery — generated placeholder project photos with captions (replaceable with real site photos later).
+5. Why choose us / stats strip.
+6. Contact section: both phone numbers, address, and a map link.
+7. Footer with a discreet "Owner login" link to `/auth`.
+
+Design keeps the existing Blueprint theme tokens (dark/light safe), no new colors hardcoded.
+
+## Technical notes
+
+- Logo and demo-work images uploaded via Lovable Assets (CDN pointers), not committed binaries.
+- Landing route gets its own SEO head: title, description, og tags, plus LocalBusiness JSON-LD with the address and phone numbers.
+- No database or auth changes; `/dashboard`, projects, expenses, payments, investments untouched apart from the padding and PDF fixes above.
 
 ## Verification
 
 - Typecheck passes.
-- Route loads at `/data-safety` and shows all tabs populated with the signed-in user's data.
-- CSV export downloads a valid file for each tab.
-- Deleting a row refreshes the table and reflects in the rest of the app.
+- Date inputs and their popups readable in dark mode.
+- Expenses page visually aligned with Payments.
+- Downloaded PDFs show totals.
+- Landing page renders portfolio content; sign-in still reachable.
