@@ -35,7 +35,8 @@ function finish(doc: jsPDF, filename: string) {
 
 export function downloadExpensesPdf(expenses: Expense[], projectName: (id: string) => string) {
   const doc = new jsPDF();
-  header(doc, "Expenses report", `${expenses.length} entries · Total ${money(sum(expenses))}`);
+  const total = sum(expenses);
+  header(doc, "Expenses report", `${expenses.length} entries · Total ${money(total)}`);
   autoTable(doc, {
     startY: 40,
     head: [["Date", "Project", "Category", "Description", "Amount"]],
@@ -46,15 +47,19 @@ export function downloadExpensesPdf(expenses: Expense[], projectName: (id: strin
       e.description || "-",
       money(e.amount),
     ]),
+    foot: [["", "", "", "Total expenses", money(total)]],
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
   });
+  totalsLine(doc, `Total expenses: ${money(total)}`);
   finish(doc, "expenses-report.pdf");
 }
 
 export function downloadPaymentsPdf(payments: Payment[], projectName: (id: string) => string) {
   const doc = new jsPDF();
-  header(doc, "Payments report", `${payments.length} entries · Total ${money(sum(payments))}`);
+  const total = sum(payments);
+  header(doc, "Payments report", `${payments.length} entries · Total ${money(total)}`);
   autoTable(doc, {
     startY: 40,
     head: [["Date", "Project", "Method", "Notes", "Amount"]],
@@ -65,9 +70,12 @@ export function downloadPaymentsPdf(payments: Payment[], projectName: (id: strin
       p.notes || "-",
       money(p.amount),
     ]),
+    foot: [["", "", "", "Total payments received", money(total)]],
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
   });
+  totalsLine(doc, `Total payments received: ${money(total)}`);
   finish(doc, "payments-report.pdf");
 }
 
