@@ -115,7 +115,7 @@ export function downloadProjectSummaryPdf(
     columnStyles: { 0: { fontStyle: "bold" }, 2: { fontStyle: "bold" } },
   });
 
-  let y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+  let y = lastY(doc) + 10;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("Expenses", 14, y);
@@ -130,11 +130,13 @@ export function downloadProjectSummaryPdf(
           money(e.amount),
         ])
       : [["-", "-", "No expenses recorded", "-"]],
+    foot: [["", "", "Total expenses", money(spent)]],
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
   });
 
-  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+  y = lastY(doc) + 10;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("Payments", 14, y);
@@ -149,8 +151,24 @@ export function downloadProjectSummaryPdf(
           money(p.amount),
         ])
       : [["-", "-", "No payments recorded", "-"]],
+    foot: [["", "", "Total payments received", money(received)]],
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
+  });
+
+  y = lastY(doc) + 10;
+  autoTable(doc, {
+    startY: y,
+    theme: "grid",
+    body: [
+      ["Total expenses", money(spent)],
+      ["Total payments received", money(received)],
+      ["Balance (budget - received)", money(Number(project.budget ?? 0) - received)],
+      ["Received - spent", money(received - spent)],
+    ],
+    styles: { fontSize: 10, fontStyle: "bold" },
+    columnStyles: { 1: { halign: "right" } },
   });
 
   finish(doc, `${project.project_name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-summary.pdf`);
