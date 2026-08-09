@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { HardHat, Landmark, LayoutDashboard, Receipt, FolderKanban, Wallet } from "lucide-react";
+import { Landmark, LayoutDashboard, Receipt, FolderKanban, Wallet } from "lucide-react";
+import logoAsset from "@/assets/zainab-logo.png.asset.json";
 import {
   Sidebar,
   SidebarContent,
