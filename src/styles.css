@@ -165,3 +165,31 @@
     linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
   background-size: 28px 28px;
 }
+
+/* Native date/time inputs: keep the picker icon and popup readable in dark mode */
+.dark {
+  color-scheme: dark;
+}
+
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"] {
+  color-scheme: light;
+}
+
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="month"],
+.dark input[type="time"] {
+  color-scheme: dark;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.dark input[type="month"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.6);
+  opacity: 0.85;
+  cursor: pointer;
+}

@@ -89,37 +89,46 @@ function ExpensesPage() {
       </div>
 
       <Card className="rounded-2xl shadow-card">
-        <CardContent className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="relative sm:col-span-2 lg:col-span-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search expenses…"
-              className="pl-9"
-              aria-label="Search expenses"
-            />
+        <CardContent className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="space-y-1.5 sm:col-span-2 xl:col-span-1">
+            <Label htmlFor="expense-search" className="text-xs text-muted-foreground">
+              Search
+            </Label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="expense-search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search expenses…"
+                className="pl-9"
+                aria-label="Search expenses"
+              />
+            </div>
           </div>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger aria-label="Filter by category">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
-              {EXPENSE_CATEGORIES.map((c) => (
-                <SelectItem key={c.value} value={c.value}>
-                  {c.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="space-y-1">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Category</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger aria-label="Filter by category" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All categories</SelectItem>
+                {EXPENSE_CATEGORIES.map((c) => (
+                  <SelectItem key={c.value} value={c.value}>
+                    {c.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
             <Label htmlFor="from" className="text-xs text-muted-foreground">
               From
             </Label>
             <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <Label htmlFor="to" className="text-xs text-muted-foreground">
               To
             </Label>
@@ -140,15 +149,18 @@ function ExpensesPage() {
         <Card className="rounded-2xl shadow-card">
           <CardContent className="divide-y divide-border p-0">
             {filtered.map((e) => (
-              <div key={e.id} className="flex items-center justify-between gap-3 p-4">
-                <div className="min-w-0">
+              <div
+                key={e.id}
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-4"
+              >
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{e.description || categoryLabel(e.category)}</p>
                   <p className="truncate text-xs text-muted-foreground">
                     {projectName(e.project_id)} · {categoryLabel(e.category)} · {formatDate(e.expense_date)}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <span className="text-sm font-semibold">{formatMoney(e.amount)}</span>
+                  <span className="mr-1 text-sm font-semibold tabular-nums">{formatMoney(e.amount)}</span>
                   <Button
                     variant="ghost"
                     size="icon"

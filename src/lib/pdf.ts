@@ -29,13 +29,26 @@ function header(doc: jsPDF, title: string, subtitle?: string) {
   doc.setTextColor(0);
 }
 
+function lastY(doc: jsPDF) {
+  return (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+}
+
+function totalsLine(doc: jsPDF, text: string) {
+  const y = lastY(doc) + 10;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text(text, 14, y);
+  doc.setFont("helvetica", "normal");
+}
+
 function finish(doc: jsPDF, filename: string) {
   doc.save(filename);
 }
 
 export function downloadExpensesPdf(expenses: Expense[], projectName: (id: string) => string) {
   const doc = new jsPDF();
-  header(doc, "Expenses report", `${expenses.length} entries · Total ${money(sum(expenses))}`);
+  const total = sum(expenses);
+  header(doc, "Expenses report", `${expenses.length} entries · Total ${money(total)}`);
   autoTable(doc, {
     startY: 40,
     head: [["Date", "Project", "Category", "Description", "Amount"]],
@@ -46,15 +59,19 @@ export function downloadExpensesPdf(expenses: Expense[], projectName: (id: strin
       e.description || "-",
       money(e.amount),
     ]),
+    foot: [["", "", "", "Total expenses", money(total)]],
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
   });
+  totalsLine(doc, `Total expenses: ${money(total)}`);
   finish(doc, "expenses-report.pdf");
 }
 
 export function downloadPaymentsPdf(payments: Payment[], projectName: (id: string) => string) {
   const doc = new jsPDF();
-  header(doc, "Payments report", `${payments.length} entries · Total ${money(sum(payments))}`);
+  const total = sum(payments);
+  header(doc, "Payments report", `${payments.length} entries · Total ${money(total)}`);
   autoTable(doc, {
     startY: 40,
     head: [["Date", "Project", "Method", "Notes", "Amount"]],
@@ -65,9 +82,12 @@ export function downloadPaymentsPdf(payments: Payment[], projectName: (id: strin
       p.notes || "-",
       money(p.amount),
     ]),
+    foot: [["", "", "", "Total payments received", money(total)]],
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
   });
+  totalsLine(doc, `Total payments received: ${money(total)}`);
   finish(doc, "payments-report.pdf");
 }
 
@@ -95,7 +115,7 @@ export function downloadProjectSummaryPdf(
     columnStyles: { 0: { fontStyle: "bold" }, 2: { fontStyle: "bold" } },
   });
 
-  let y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+  let y = lastY(doc) + 10;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("Expenses", 14, y);
@@ -110,11 +130,13 @@ export function downloadProjectSummaryPdf(
           money(e.amount),
         ])
       : [["-", "-", "No expenses recorded", "-"]],
+    foot: [["", "", "Total expenses", money(spent)]],
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
   });
 
-  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+  y = lastY(doc) + 10;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("Payments", 14, y);
@@ -129,8 +151,24 @@ export function downloadProjectSummaryPdf(
           money(p.amount),
         ])
       : [["-", "-", "No payments recorded", "-"]],
+    foot: [["", "", "Total payments received", money(received)]],
     styles: { fontSize: 9 },
     headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
+  });
+
+  y = lastY(doc) + 10;
+  autoTable(doc, {
+    startY: y,
+    theme: "grid",
+    body: [
+      ["Total expenses", money(spent)],
+      ["Total payments received", money(received)],
+      ["Balance (budget - received)", money(Number(project.budget ?? 0) - received)],
+      ["Received - spent", money(received - spent)],
+    ],
+    styles: { fontSize: 10, fontStyle: "bold" },
+    columnStyles: { 1: { halign: "right" } },
   });
 
   finish(doc, `${project.project_name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-summary.pdf`);

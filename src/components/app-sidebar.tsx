@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { HardHat, Landmark, LayoutDashboard, Receipt, FolderKanban, Wallet } from "lucide-react";
+import { Landmark, LayoutDashboard, Receipt, FolderKanban, Wallet } from "lucide-react";
+import logoAsset from "@/assets/zainab-logo.png.asset.json";
 import {
   Sidebar,
   SidebarContent,
@@ -30,14 +31,18 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="px-3 py-4">
         <Link to="/dashboard" className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
-            <HardHat className="h-5 w-5" />
-          </span>
+          <img
+            src={logoAsset.url}
+            alt="Zainab Construction & Real Estate logo"
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 rounded-xl object-contain"
+          />
           {!collapsed && (
             <span className="font-display text-sm font-semibold leading-tight">
-              Zainab Constructions
+              Zainab Construction
               <span className="block text-xs font-normal text-muted-foreground">
-                Construction manager
+                & Real Estate
               </span>
             </span>
           )}
