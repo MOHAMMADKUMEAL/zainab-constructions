@@ -29,6 +29,18 @@ function header(doc: jsPDF, title: string, subtitle?: string) {
   doc.setTextColor(0);
 }
 
+function lastY(doc: jsPDF) {
+  return (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+}
+
+function totalsLine(doc: jsPDF, text: string) {
+  const y = lastY(doc) + 10;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text(text, 14, y);
+  doc.setFont("helvetica", "normal");
+}
+
 function finish(doc: jsPDF, filename: string) {
   doc.save(filename);
 }
