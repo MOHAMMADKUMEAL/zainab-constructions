@@ -116,6 +116,8 @@ export function PaymentDialog({
         id: payment?.id,
         values: {
           project_id: projectId,
+          expense_id: expenseId === NONE ? null : expenseId,
+          direction: expenseId === NONE ? "in" : "out",
           amount: Number(amount || 0),
           payment_method: method,
           payment_date: date,
@@ -132,12 +134,20 @@ export function PaymentDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{payment ? "Edit payment" : "Record payment"}</DialogTitle>
-          <DialogDescription>Log money received from the client.</DialogDescription>
+          <DialogDescription>
+            Log money received from the client, or a payment made against a pending payment.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="payment-project">Project</Label>
-            <Select value={projectId} onValueChange={setProjectId}>
+            <Select
+              value={projectId}
+              onValueChange={(v) => {
+                setProjectId(v);
+                setExpenseId(NONE);
+              }}
+            >
               <SelectTrigger id="payment-project">
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
@@ -150,6 +160,39 @@ export function PaymentDialog({
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="payment-link">Payment for</Label>
+            <Select value={expenseId} onValueChange={setExpenseId}>
+              <SelectTrigger id="payment-link">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Payment received from client</SelectItem>
+                {projectExpenses.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>
+                    {categoryLabel(e.category)}
+                    {e.description ? ` — ${e.description}` : ""} · {formatMoney(e.amount)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {linkedSummary ? (
+              <p className="text-xs text-muted-foreground">
+                Finalized {formatMoney(linkedSummary.finalized)} · Paid{" "}
+                {formatMoney(linkedSummary.paid)} · Remaining{" "}
+                <span className="font-medium text-foreground">
+                  {formatMoney(linkedSummary.remaining)}
+                </span>
+              </p>
+            ) : null}
+            {overpaying ? (
+              <p className="text-xs font-medium text-destructive">
+                This amount is more than the remaining balance.
+              </p>
+            ) : null}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="payment-amount">Amount (₹)</Label>
