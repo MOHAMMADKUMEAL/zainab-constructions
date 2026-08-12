@@ -9,8 +9,11 @@ import {
   sum,
   type Expense,
   type Payment,
+  type AgreementPayment,
   type Project,
+  type PropertyAgreement,
 } from "./domain";
+import { PAY_STATUS_LABEL, type CategorySummary, type PendingSummary } from "./pending";
 
 const BRAND = "Zainab Constructions";
 
@@ -172,4 +175,165 @@ export function downloadProjectSummaryPdf(
   });
 
   finish(doc, `${project.project_name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-summary.pdf`);
+}
+
+/* ---------------------- pending payments & categories ---------------------- */
+
+export function downloadPendingPaymentsPdf(
+  rows: PendingSummary[],
+  projectName: (id: string) => string,
+) {
+  const doc = new jsPDF();
+  const finalized = rows.reduce((a, r) => a + r.finalized, 0);
+  const paid = rows.reduce((a, r) => a + r.paid, 0);
+  const remaining = rows.reduce((a, r) => a + r.remaining, 0);
+  header(doc, "Pending payments report", `${rows.length} entries · ${money(remaining)} remaining`);
+  autoTable(doc, {
+    startY: 40,
+    head: [["Date", "Project", "Category", "Details", "Finalized", "Paid", "Remaining", "Status"]],
+    body: rows.map((r) => [
+      formatDate(r.expense.expense_date),
+      projectName(r.expense.project_id),
+      categoryLabel(r.expense.category),
+      r.expense.description || "-",
+      money(r.finalized),
+      money(r.paid),
+      money(r.remaining),
+      PAY_STATUS_LABEL[r.status],
+    ]),
+    foot: [["", "", "", "Totals", money(finalized), money(paid), money(remaining), ""]],
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
+  });
+  totalsLine(
+    doc,
+    `Finalized: ${money(finalized)}   Paid: ${money(paid)}   Remaining: ${money(remaining)}`,
+  );
+  finish(doc, "pending-payments-report.pdf");
+}
+
+export function downloadCategoryPdf(
+  summary: CategorySummary,
+  projectName: (id: string) => string,
+) {
+  const doc = new jsPDF();
+  const label = categoryLabel(summary.category);
+  header(
+    doc,
+    `${label} — payment report`,
+    `${summary.entries.length} work entries · ${money(summary.remaining)} remaining`,
+  );
+
+  autoTable(doc, {
+    startY: 40,
+    head: [["Date", "Project", "Details", "Area / rate", "Finalized", "Paid", "Remaining", "Status"]],
+    body: summary.entries.length
+      ? summary.entries.map((r) => {
+          const l = Number(r.expense.plot_length ?? 0);
+          const w = Number(r.expense.plot_width ?? 0);
+          const rate = Number(r.expense.rate_per_sqft ?? 0);
+          const dims = l > 0 && w > 0 ? `${l} x ${w} = ${l * w} sqft @ Rs. ${rate}` : "-";
+          return [
+            formatDate(r.expense.expense_date),
+            projectName(r.expense.project_id),
+            r.expense.description || "-",
+            dims,
+            money(r.finalized),
+            money(r.paid),
+            money(r.remaining),
+            PAY_STATUS_LABEL[r.status],
+          ];
+        })
+      : [["-", "-", "No entries recorded", "-", "-", "-", "-", "-"]],
+    foot: [
+      [
+        "",
+        "",
+        "",
+        "Totals",
+        money(summary.finalized),
+        money(summary.paid),
+        money(summary.remaining),
+        "",
+      ],
+    ],
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
+  });
+
+  const y = lastY(doc) + 10;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("Payment history", 14, y);
+  autoTable(doc, {
+    startY: y + 3,
+    head: [["Date", "Project", "Method", "Notes", "Amount"]],
+    body: summary.history.length
+      ? summary.history.map((p) => [
+          formatDate(p.payment_date),
+          projectName(p.project_id),
+          methodLabel(p.payment_method),
+          p.notes || "-",
+          money(p.amount),
+        ])
+      : [["-", "-", "-", "No payments made yet", "-"]],
+    foot: [["", "", "", "Total paid", money(summary.paid)]],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
+  });
+
+  totalsLine(
+    doc,
+    `Finalized: ${money(summary.finalized)}   Paid: ${money(summary.paid)}   Remaining: ${money(summary.remaining)}`,
+  );
+  finish(doc, `${summary.category}-payment-report.pdf`);
+}
+
+export function downloadAgreementPdf(
+  agreement: PropertyAgreement,
+  payments: AgreementPayment[],
+) {
+  const doc = new jsPDF();
+  const paid = payments.reduce((a, p) => a + Number(p.amount ?? 0), 0);
+  const total = Number(agreement.total_amount ?? 0);
+  header(doc, `Agreement — ${agreement.property_title}`, agreement.location || undefined);
+
+  autoTable(doc, {
+    startY: 40,
+    theme: "plain",
+    body: [
+      ["Seller", agreement.seller_name || "-", "Agreement date", formatDate(agreement.agreement_date)],
+      ["Total agreed amount", money(total), "Advance / paid", money(paid)],
+      ["Balance remaining", money(Math.max(total - paid, 0)), "Notes", agreement.notes || "-"],
+    ],
+    styles: { fontSize: 9 },
+    columnStyles: { 0: { fontStyle: "bold" }, 2: { fontStyle: "bold" } },
+  });
+
+  const y = lastY(doc) + 10;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("Advance payment history", 14, y);
+  autoTable(doc, {
+    startY: y + 3,
+    head: [["Date", "Method", "Notes", "Amount"]],
+    body: payments.length
+      ? payments.map((p) => [
+          formatDate(p.payment_date),
+          methodLabel(p.payment_method),
+          p.notes || "-",
+          money(p.amount),
+        ])
+      : [["-", "-", "No payments recorded", "-"]],
+    foot: [["", "", "Total paid", money(paid)]],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
+  });
+
+  totalsLine(doc, `Total ${money(total)}   Paid ${money(paid)}   Balance ${money(Math.max(total - paid, 0))}`);
+  finish(doc, `${agreement.property_title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-agreement.pdf`);
 }
