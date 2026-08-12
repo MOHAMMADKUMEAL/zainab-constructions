@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { EmptyState } from "@/components/empty-state";
-import { ExpenseDialog } from "@/components/expense-dialog";
+import { PendingPaymentDialog } from "@/components/pending-payment-dialog";
 import { PaymentDialog } from "@/components/payment-dialog";
 import { ProjectDialog } from "@/components/project-dialog";
 import { ScreenshotLink } from "@/components/screenshot-link";
@@ -218,7 +218,7 @@ function ProjectDetailPage() {
                 setExpenseOpen(true);
               }}
             >
-              <Plus className="h-4 w-4" /> Add expense
+              <Plus className="h-4 w-4" /> Add pending payment
             </Button>
           </div>
           {expenses.length === 0 ? (
@@ -371,7 +371,7 @@ function ProjectDetailPage() {
       </Tabs>
 
       <ProjectDialog open={editOpen} onOpenChange={setEditOpen} project={project} />
-      <ExpenseDialog
+      <PendingPaymentDialog
         open={expenseOpen}
         onOpenChange={setExpenseOpen}
         expense={editingExpense}

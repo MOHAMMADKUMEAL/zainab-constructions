@@ -25,7 +25,7 @@ import {
 import { StatCard } from "@/components/stat-card";
 import { EmptyState } from "@/components/empty-state";
 import { ProjectDialog } from "@/components/project-dialog";
-import { ExpenseDialog } from "@/components/expense-dialog";
+import { PendingPaymentDialog } from "@/components/pending-payment-dialog";
 import { PaymentDialog } from "@/components/payment-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -112,7 +112,7 @@ function DashboardPage() {
             <Plus className="h-4 w-4" /> Add project
           </Button>
           <Button variant="outline" onClick={() => setExpenseOpen(true)}>
-            <Receipt className="h-4 w-4" /> Add expense
+            <Receipt className="h-4 w-4" /> Add pending payment
           </Button>
           <Button variant="outline" onClick={() => setPaymentOpen(true)}>
             <Wallet className="h-4 w-4" /> Add payment
@@ -288,7 +288,7 @@ function DashboardPage() {
       )}
 
       <ProjectDialog open={projectOpen} onOpenChange={setProjectOpen} />
-      <ExpenseDialog open={expenseOpen} onOpenChange={setExpenseOpen} />
+      <PendingPaymentDialog open={expenseOpen} onOpenChange={setExpenseOpen} />
       <PaymentDialog open={paymentOpen} onOpenChange={setPaymentOpen} />
     </div>
   );

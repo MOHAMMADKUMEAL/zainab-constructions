@@ -2,15 +2,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type {
+  AgreementPayment,
   Expense,
   Investment,
   InvestmentInvestor,
   Payment,
   Project,
   ProjectNote,
+  PropertyAgreement,
 } from "./domain";
 
 type Insert<T> = Partial<T> & Record<string, unknown>;
+
 
 /* ---------------------------------- reads --------------------------------- */
 
@@ -108,6 +111,34 @@ export function useInvestmentInvestors() {
   });
 }
 
+export function usePropertyAgreements() {
+  return useQuery({
+    queryKey: ["property_agreements"],
+    queryFn: async (): Promise<PropertyAgreement[]> => {
+      const { data, error } = await supabase
+        .from("property_agreements")
+        .select("*")
+        .order("agreement_date", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useAgreementPayments() {
+  return useQuery({
+    queryKey: ["agreement_payments"],
+    queryFn: async (): Promise<AgreementPayment[]> => {
+      const { data, error } = await supabase
+        .from("agreement_payments")
+        .select("*")
+        .order("payment_date", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 /* --------------------------------- writes --------------------------------- */
 
 function useInvalidate() {
@@ -119,6 +150,8 @@ function useInvalidate() {
     qc.invalidateQueries({ queryKey: ["project_notes"] });
     qc.invalidateQueries({ queryKey: ["investments"] });
     qc.invalidateQueries({ queryKey: ["investment_investors"] });
+    qc.invalidateQueries({ queryKey: ["property_agreements"] });
+    qc.invalidateQueries({ queryKey: ["agreement_payments"] });
   };
 }
 
@@ -128,7 +161,10 @@ type Table =
   | "payments"
   | "project_notes"
   | "investments"
-  | "investment_investors";
+  | "investment_investors"
+  | "property_agreements"
+  | "agreement_payments";
+
 
 export function useSaveRow<T>(table: Table, labels: { created: string; updated: string }) {
   const invalidate = useInvalidate();

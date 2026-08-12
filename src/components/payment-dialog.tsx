@@ -21,21 +21,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjects, useSaveRow } from "@/lib/data";
-import { PAYMENT_METHODS, type Payment, type PaymentMethod } from "@/lib/domain";
+import { useExpenses, usePayments, useProjects, useSaveRow } from "@/lib/data";
+import {
+  PAYMENT_METHODS,
+  categoryLabel,
+  formatMoney,
+  type Payment,
+  type PaymentMethod,
+} from "@/lib/domain";
+import { summarise } from "@/lib/pending";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   payment?: Payment | null;
   defaultProjectId?: string;
+  defaultExpenseId?: string;
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
+const NONE = "none";
 
-export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }: Props) {
+export function PaymentDialog({
+  open,
+  onOpenChange,
+  payment,
+  defaultProjectId,
+  defaultExpenseId,
+}: Props) {
   const { data: projects = [] } = useProjects();
+  const { data: allExpenses = [] } = useExpenses();
+  const { data: allPayments = [] } = usePayments();
   const [projectId, setProjectId] = useState(defaultProjectId ?? "");
+  const [expenseId, setExpenseId] = useState<string>(defaultExpenseId ?? NONE);
   const [method, setMethod] = useState<PaymentMethod>("cash");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(today());
@@ -51,12 +69,25 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
   useEffect(() => {
     if (!open) return;
     setProjectId(payment?.project_id ?? defaultProjectId ?? "");
+    setExpenseId(payment?.expense_id ?? defaultExpenseId ?? NONE);
     setMethod(payment?.payment_method ?? "cash");
     setAmount(payment ? String(payment.amount) : "");
     setDate(payment?.payment_date ?? today());
     setNotes(payment?.notes ?? "");
     setScreenshotPath(payment?.screenshot_path ?? "");
-  }, [open, payment, defaultProjectId]);
+  }, [open, payment, defaultProjectId, defaultExpenseId]);
+
+  const projectExpenses = allExpenses.filter((e) => e.project_id === projectId);
+  const linked = allExpenses.find((e) => e.id === expenseId) ?? null;
+  const linkedSummary = linked
+    ? summarise(
+        linked,
+        allPayments.filter((p) => p.id !== payment?.id),
+      )
+    : null;
+  const overpaying =
+    !!linkedSummary && Number(amount || 0) > linkedSummary.remaining + 0.5;
+
 
   const upload = async (file: File) => {
     setUploading(true);
@@ -85,6 +116,8 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
         id: payment?.id,
         values: {
           project_id: projectId,
+          expense_id: expenseId === NONE ? null : expenseId,
+          direction: expenseId === NONE ? "in" : "out",
           amount: Number(amount || 0),
           payment_method: method,
           payment_date: date,
@@ -101,12 +134,20 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{payment ? "Edit payment" : "Record payment"}</DialogTitle>
-          <DialogDescription>Log money received from the client.</DialogDescription>
+          <DialogDescription>
+            Log money received from the client, or a payment made against a pending payment.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="payment-project">Project</Label>
-            <Select value={projectId} onValueChange={setProjectId}>
+            <Select
+              value={projectId}
+              onValueChange={(v) => {
+                setProjectId(v);
+                setExpenseId(NONE);
+              }}
+            >
               <SelectTrigger id="payment-project">
                 <SelectValue placeholder="Select project" />
               </SelectTrigger>
@@ -119,6 +160,39 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
               </SelectContent>
             </Select>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="payment-link">Payment for</Label>
+            <Select value={expenseId} onValueChange={setExpenseId}>
+              <SelectTrigger id="payment-link">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>Payment received from client</SelectItem>
+                {projectExpenses.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>
+                    {categoryLabel(e.category)}
+                    {e.description ? ` — ${e.description}` : ""} · {formatMoney(e.amount)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {linkedSummary ? (
+              <p className="text-xs text-muted-foreground">
+                Finalized {formatMoney(linkedSummary.finalized)} · Paid{" "}
+                {formatMoney(linkedSummary.paid)} · Remaining{" "}
+                <span className="font-medium text-foreground">
+                  {formatMoney(linkedSummary.remaining)}
+                </span>
+              </p>
+            ) : null}
+            {overpaying ? (
+              <p className="text-xs font-medium text-destructive">
+                This amount is more than the remaining balance.
+              </p>
+            ) : null}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="payment-amount">Amount (₹)</Label>

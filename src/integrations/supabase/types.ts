@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      agreement_payments: {
+        Row: {
+          agreement_id: string
+          amount: number
+          created_at: string
+          id: string
+          notes: string
+          payment_date: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          user_id: string
+        }
+        Insert: {
+          agreement_id: string
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string
+          payment_date?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          user_id?: string
+        }
+        Update: {
+          agreement_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string
+          payment_date?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agreement_payments_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "property_agreements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -22,7 +63,11 @@ export type Database = {
           description: string
           expense_date: string
           id: string
+          notes: string
+          plot_length: number | null
+          plot_width: number | null
           project_id: string
+          rate_per_sqft: number | null
           user_id: string
         }
         Insert: {
@@ -32,7 +77,11 @@ export type Database = {
           description?: string
           expense_date?: string
           id?: string
+          notes?: string
+          plot_length?: number | null
+          plot_width?: number | null
           project_id: string
+          rate_per_sqft?: number | null
           user_id?: string
         }
         Update: {
@@ -42,7 +91,11 @@ export type Database = {
           description?: string
           expense_date?: string
           id?: string
+          notes?: string
+          plot_length?: number | null
+          plot_width?: number | null
           project_id?: string
+          rate_per_sqft?: number | null
           user_id?: string
         }
         Relationships: [
@@ -133,6 +186,8 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          direction: string
+          expense_id: string | null
           id: string
           notes: string
           payment_date: string
@@ -144,6 +199,8 @@ export type Database = {
         Insert: {
           amount?: number
           created_at?: string
+          direction?: string
+          expense_id?: string | null
           id?: string
           notes?: string
           payment_date?: string
@@ -155,6 +212,8 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          direction?: string
+          expense_id?: string | null
           id?: string
           notes?: string
           payment_date?: string
@@ -164,6 +223,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_project_id_fkey"
             columns: ["project_id"]
@@ -247,6 +313,56 @@ export type Database = {
         }
         Relationships: []
       }
+      property_agreements: {
+        Row: {
+          agreement_date: string
+          created_at: string
+          description: string
+          document_path: string
+          id: string
+          investment_id: string | null
+          notes: string
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          property_name: string
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          agreement_date?: string
+          created_at?: string
+          description?: string
+          document_path?: string
+          id?: string
+          investment_id?: string | null
+          notes?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          property_name: string
+          total_amount?: number
+          user_id?: string
+        }
+        Update: {
+          agreement_date?: string
+          created_at?: string
+          description?: string
+          document_path?: string
+          id?: string
+          investment_id?: string | null
+          notes?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          property_name?: string
+          total_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_agreements_investment_id_fkey"
+            columns: ["investment_id"]
+            isOneToOne: false
+            referencedRelation: "investments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -266,6 +382,8 @@ export type Database = {
         | "other"
         | "goundi"
         | "shentring_mestri"
+        | "tiles_fitter"
+        | "tiles_material"
       payment_method: "cash" | "upi" | "bank_transfer" | "cheque"
       project_status: "planning" | "running" | "completed" | "on_hold"
     }
@@ -406,6 +524,8 @@ export const Constants = {
         "other",
         "goundi",
         "shentring_mestri",
+        "tiles_fitter",
+        "tiles_material",
       ],
       payment_method: ["cash", "upi", "bank_transfer", "cheque"],
       project_status: ["planning", "running", "completed", "on_hold"],
