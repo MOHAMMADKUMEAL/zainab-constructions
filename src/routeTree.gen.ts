@@ -18,6 +18,7 @@ import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedPendingPaymentsRouteImport } from './routes/_authenticated/pending-payments'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedCategoryPaymentsIndexRouteImport } from './routes/_authenticated/category-payments.index'
+import { Route as AuthenticatedCategoryPaymentsCategoryRouteImport } from './routes/_authenticated/category-payments.$category'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects.index'
 import { Route as AuthenticatedProjectsIdRouteImport } from './routes/_authenticated/projects.$id'
 
@@ -68,6 +69,12 @@ const AuthenticatedCategoryPaymentsIndexRoute =
     path: '/category-payments/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCategoryPaymentsCategoryRoute =
+  AuthenticatedCategoryPaymentsCategoryRouteImport.update({
+    id: '/category-payments/$category',
+    path: '/category-payments/$category',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProjectsIndexRoute =
   AuthenticatedProjectsIndexRouteImport.update({
     id: '/projects/',
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/pending-payments': typeof AuthenticatedPendingPaymentsRoute
   '/search': typeof AuthenticatedSearchRoute
+  '/category-payments/$category': typeof AuthenticatedCategoryPaymentsCategoryRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
   '/category-payments/': typeof AuthenticatedCategoryPaymentsIndexRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
@@ -100,6 +108,7 @@ export interface FileRoutesByTo {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/pending-payments': typeof AuthenticatedPendingPaymentsRoute
   '/search': typeof AuthenticatedSearchRoute
+  '/category-payments/$category': typeof AuthenticatedCategoryPaymentsCategoryRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
   '/category-payments': typeof AuthenticatedCategoryPaymentsIndexRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
@@ -114,6 +123,7 @@ export interface FileRoutesById {
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/pending-payments': typeof AuthenticatedPendingPaymentsRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
+  '/_authenticated/category-payments/$category': typeof AuthenticatedCategoryPaymentsCategoryRoute
   '/_authenticated/projects/$id': typeof AuthenticatedProjectsIdRoute
   '/_authenticated/category-payments/': typeof AuthenticatedCategoryPaymentsIndexRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/payments'
     | '/pending-payments'
     | '/search'
+    | '/category-payments/$category'
     | '/projects/$id'
     | '/category-payments/'
     | '/projects/'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/payments'
     | '/pending-payments'
     | '/search'
+    | '/category-payments/$category'
     | '/projects/$id'
     | '/category-payments'
     | '/projects'
@@ -153,6 +165,7 @@ export interface FileRouteTypes {
     | '/_authenticated/payments'
     | '/_authenticated/pending-payments'
     | '/_authenticated/search'
+    | '/_authenticated/category-payments/$category'
     | '/_authenticated/projects/$id'
     | '/_authenticated/category-payments/'
     | '/_authenticated/projects/'
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCategoryPaymentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/category-payments/$category': {
+      id: '/_authenticated/category-payments/$category'
+      path: '/category-payments/$category'
+      fullPath: '/category-payments/$category'
+      preLoaderRoute: typeof AuthenticatedCategoryPaymentsCategoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/projects/': {
       id: '/_authenticated/projects/'
       path: '/projects'
@@ -252,6 +272,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPendingPaymentsRoute: typeof AuthenticatedPendingPaymentsRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
+  AuthenticatedCategoryPaymentsCategoryRoute: typeof AuthenticatedCategoryPaymentsCategoryRoute
   AuthenticatedProjectsIdRoute: typeof AuthenticatedProjectsIdRoute
   AuthenticatedCategoryPaymentsIndexRoute: typeof AuthenticatedCategoryPaymentsIndexRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
@@ -263,6 +284,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPendingPaymentsRoute: AuthenticatedPendingPaymentsRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
+  AuthenticatedCategoryPaymentsCategoryRoute:
+    AuthenticatedCategoryPaymentsCategoryRoute,
   AuthenticatedProjectsIdRoute: AuthenticatedProjectsIdRoute,
   AuthenticatedCategoryPaymentsIndexRoute:
     AuthenticatedCategoryPaymentsIndexRoute,
