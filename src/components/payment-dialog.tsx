@@ -21,21 +21,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useProjects, useSaveRow } from "@/lib/data";
-import { PAYMENT_METHODS, type Payment, type PaymentMethod } from "@/lib/domain";
+import { useExpenses, usePayments, useProjects, useSaveRow } from "@/lib/data";
+import {
+  PAYMENT_METHODS,
+  categoryLabel,
+  formatMoney,
+  type Payment,
+  type PaymentMethod,
+} from "@/lib/domain";
+import { summarise } from "@/lib/pending";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   payment?: Payment | null;
   defaultProjectId?: string;
+  defaultExpenseId?: string;
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
+const NONE = "none";
 
-export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }: Props) {
+export function PaymentDialog({
+  open,
+  onOpenChange,
+  payment,
+  defaultProjectId,
+  defaultExpenseId,
+}: Props) {
   const { data: projects = [] } = useProjects();
+  const { data: allExpenses = [] } = useExpenses();
+  const { data: allPayments = [] } = usePayments();
   const [projectId, setProjectId] = useState(defaultProjectId ?? "");
+  const [expenseId, setExpenseId] = useState<string>(defaultExpenseId ?? NONE);
   const [method, setMethod] = useState<PaymentMethod>("cash");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(today());
@@ -51,12 +69,25 @@ export function PaymentDialog({ open, onOpenChange, payment, defaultProjectId }:
   useEffect(() => {
     if (!open) return;
     setProjectId(payment?.project_id ?? defaultProjectId ?? "");
+    setExpenseId(payment?.expense_id ?? defaultExpenseId ?? NONE);
     setMethod(payment?.payment_method ?? "cash");
     setAmount(payment ? String(payment.amount) : "");
     setDate(payment?.payment_date ?? today());
     setNotes(payment?.notes ?? "");
     setScreenshotPath(payment?.screenshot_path ?? "");
-  }, [open, payment, defaultProjectId]);
+  }, [open, payment, defaultProjectId, defaultExpenseId]);
+
+  const projectExpenses = allExpenses.filter((e) => e.project_id === projectId);
+  const linked = allExpenses.find((e) => e.id === expenseId) ?? null;
+  const linkedSummary = linked
+    ? summarise(
+        linked,
+        allPayments.filter((p) => p.id !== payment?.id),
+      )
+    : null;
+  const overpaying =
+    !!linkedSummary && Number(amount || 0) > linkedSummary.remaining + 0.5;
+
 
   const upload = async (file: File) => {
     setUploading(true);
