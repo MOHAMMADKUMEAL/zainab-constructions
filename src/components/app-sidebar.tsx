@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Landmark, LayoutDashboard, Receipt, FolderKanban, Wallet } from "lucide-react";
+import { Landmark, LayoutDashboard, LayoutGrid, Receipt, FolderKanban, Wallet } from "lucide-react";
 import logoAsset from "@/assets/zainab-logo.png.asset.json";
 import {
   Sidebar,
@@ -17,7 +17,8 @@ import {
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Projects", url: "/projects", icon: FolderKanban },
-  { title: "Expenses", url: "/expenses", icon: Receipt },
+  { title: "Pending Payments", url: "/pending-payments", icon: Receipt },
+  { title: "Category Payments", url: "/category-payments", icon: LayoutGrid },
   { title: "Payments", url: "/payments", icon: Wallet },
   { title: "Investments", url: "/investments", icon: Landmark },
 ] as const;

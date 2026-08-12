@@ -299,13 +299,13 @@ export function downloadAgreementPdf(
   const doc = new jsPDF();
   const paid = payments.reduce((a, p) => a + Number(p.amount ?? 0), 0);
   const total = Number(agreement.total_amount ?? 0);
-  header(doc, `Agreement — ${agreement.property_title}`, agreement.location || undefined);
+  header(doc, `Agreement — ${agreement.property_name}`, agreement.description || undefined);
 
   autoTable(doc, {
     startY: 40,
     theme: "plain",
     body: [
-      ["Seller", agreement.seller_name || "-", "Agreement date", formatDate(agreement.agreement_date)],
+      ["Description", agreement.description || "-", "Agreement date", formatDate(agreement.agreement_date)],
       ["Total agreed amount", money(total), "Advance / paid", money(paid)],
       ["Balance remaining", money(Math.max(total - paid, 0)), "Notes", agreement.notes || "-"],
     ],
@@ -335,5 +335,5 @@ export function downloadAgreementPdf(
   });
 
   totalsLine(doc, `Total ${money(total)}   Paid ${money(paid)}   Balance ${money(Math.max(total - paid, 0))}`);
-  finish(doc, `${agreement.property_title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-agreement.pdf`);
+  finish(doc, `${agreement.property_name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-agreement.pdf`);
 }
