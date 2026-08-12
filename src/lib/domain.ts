@@ -6,6 +6,8 @@ export type Payment = Database["public"]["Tables"]["payments"]["Row"];
 export type ProjectNote = Database["public"]["Tables"]["project_notes"]["Row"];
 export type Investment = Database["public"]["Tables"]["investments"]["Row"];
 export type InvestmentInvestor = Database["public"]["Tables"]["investment_investors"]["Row"];
+export type PropertyAgreement = Database["public"]["Tables"]["property_agreements"]["Row"];
+export type AgreementPayment = Database["public"]["Tables"]["agreement_payments"]["Row"];
 
 export type ProjectStatus = Database["public"]["Enums"]["project_status"];
 export type ExpenseCategory = Database["public"]["Enums"]["expense_category"];
@@ -26,10 +28,24 @@ export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "plumber", label: "Plumber" },
   { value: "electrician", label: "Electrician" },
   { value: "painter", label: "Painter" },
+  { value: "tiles_fitter", label: "Tiles Fitter" },
+  { value: "tiles_material", label: "Tiles Material" },
   { value: "tiles", label: "Tiles" },
   { value: "transport", label: "Transport" },
   { value: "other", label: "Other" },
 ];
+
+/** Categories shown as cards on the Category Payments dashboard. */
+export const WORK_CATEGORIES: ExpenseCategory[] = [
+  "goundi",
+  "shentring_mestri",
+  "plumber",
+  "electrician",
+  "painter",
+  "tiles_fitter",
+  "tiles_material",
+];
+
 
 export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
   { value: "cash", label: "Cash" },
