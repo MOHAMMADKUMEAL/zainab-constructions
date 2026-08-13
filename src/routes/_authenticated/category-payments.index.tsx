@@ -53,6 +53,15 @@ function CategoryPaymentsPage() {
     [scoped, payments],
   );
 
+  const kharcha = useMemo(
+    () => scoped.filter((e) => e.category === KHARCHA_CATEGORY),
+    [scoped],
+  );
+  const kharchaTotal = kharcha.reduce((a, e) => a + Number(e.amount ?? 0), 0);
+  const projectName = (id: string) => projects.find((p) => p.id === id)?.project_name ?? "—";
+
+
+
   const totals = cards.reduce(
     (a, c) => ({
       finalized: a.finalized + c.finalized,
