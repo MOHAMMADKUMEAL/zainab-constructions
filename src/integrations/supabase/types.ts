@@ -384,6 +384,11 @@ export type Database = {
         | "shentring_mestri"
         | "tiles_fitter"
         | "tiles_material"
+        | "grill"
+        | "pop"
+        | "fabrication"
+        | "carpenter"
+        | "kharcha"
       payment_method: "cash" | "upi" | "bank_transfer" | "cheque"
       project_status: "planning" | "running" | "completed" | "on_hold"
     }
@@ -526,6 +531,11 @@ export const Constants = {
         "shentring_mestri",
         "tiles_fitter",
         "tiles_material",
+        "grill",
+        "pop",
+        "fabrication",
+        "carpenter",
+        "kharcha",
       ],
       payment_method: ["cash", "upi", "bank_transfer", "cheque"],
       project_status: ["planning", "running", "completed", "on_hold"],

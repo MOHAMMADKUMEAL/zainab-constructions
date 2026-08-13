@@ -179,6 +179,33 @@ export function downloadProjectSummaryPdf(
 
 /* ---------------------- pending payments & categories ---------------------- */
 
+export function downloadKharchaPdf(expenses: Expense[], projectName: (id: string) => string) {
+  const doc = new jsPDF();
+  const total = sum(expenses);
+  header(doc, "Kharcha report", `${expenses.length} entries · Total ${money(total)}`);
+  autoTable(doc, {
+    startY: 40,
+    head: [["Date", "Project", "Details", "Notes", "Amount"]],
+    body: expenses.length
+      ? expenses.map((e) => [
+          formatDate(e.expense_date),
+          projectName(e.project_id),
+          e.description || "-",
+          e.notes || "-",
+          money(e.amount),
+        ])
+      : [["-", "-", "No kharcha recorded", "-", "-"]],
+    foot: [["", "", "", "Total kharcha", money(total)]],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [30, 58, 95] },
+    footStyles: { fillColor: [235, 238, 243], textColor: 20, fontStyle: "bold" },
+  });
+  totalsLine(doc, `Total kharcha: ${money(total)}`);
+  finish(doc, "kharcha-report.pdf");
+}
+
+
+
 export function downloadPendingPaymentsPdf(
   rows: PendingSummary[],
   projectName: (id: string) => string,

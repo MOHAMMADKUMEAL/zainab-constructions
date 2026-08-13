@@ -31,7 +31,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useExpenses, usePayments, useProjects } from "@/lib/data";
+import { summariseCategory } from "@/lib/pending";
 import {
+  KHARCHA_CATEGORY,
+  WORK_CATEGORIES,
   categoryLabel,
   formatCompactMoney,
   formatDate,
@@ -42,6 +45,7 @@ import {
   monthLabel,
   sum,
 } from "@/lib/domain";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -84,7 +88,24 @@ function DashboardPage() {
     [months, expenseRows, paymentRows],
   );
 
+  const categorySummaries = useMemo(
+    () => WORK_CATEGORIES.map((c) => summariseCategory(c, expenseRows, paymentRows)),
+    [expenseRows, paymentRows],
+  );
+  const categoryTotals = categorySummaries.reduce(
+    (a, c) => ({
+      finalized: a.finalized + c.finalized,
+      paid: a.paid + c.paid,
+      remaining: a.remaining + c.remaining,
+    }),
+    { finalized: 0, paid: 0, remaining: 0 },
+  );
+  const kharchaTotal = expenseRows
+    .filter((e) => e.category === KHARCHA_CATEGORY)
+    .reduce((a, e) => a + Number(e.amount ?? 0), 0);
+
   const byProject = useMemo(
+
     () =>
       projectRows
         .map((p) => ({
@@ -135,7 +156,61 @@ function DashboardPage() {
         />
       </div>
 
+      <Card className="rounded-2xl shadow-card">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-base">Category-wise payments</CardTitle>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/category-payments">View all</Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <Skeleton className="h-24 w-full" />
+          ) : (
+            <>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl bg-muted/50 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Finalized</p>
+                  <p className="text-base font-semibold tabular-nums">{formatMoney(categoryTotals.finalized)}</p>
+                </div>
+                <div className="rounded-xl bg-muted/50 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Paid</p>
+                  <p className="text-base font-semibold tabular-nums text-success">{formatMoney(categoryTotals.paid)}</p>
+                </div>
+                <div className="rounded-xl bg-muted/50 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Remaining</p>
+                  <p className="text-base font-semibold tabular-nums text-destructive">{formatMoney(categoryTotals.remaining)}</p>
+                </div>
+              </div>
+              <ul className="mt-3 divide-y divide-border">
+                {categorySummaries.map((c) => (
+                  <li key={c.category} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+                    <Link
+                      to="/category-payments/$category"
+                      params={{ category: c.category }}
+                      className="font-medium hover:underline"
+                    >
+                      {categoryLabel(c.category)}
+                    </Link>
+                    <span className="tabular-nums text-muted-foreground">
+                      {formatMoney(c.finalized)} · paid{" "}
+                      <span className="text-success">{formatMoney(c.paid)}</span> · left{" "}
+                      <span className="text-destructive">{formatMoney(c.remaining)}</span>
+                    </span>
+                  </li>
+                ))}
+                <li className="flex items-center justify-between gap-2 py-2 text-sm">
+                  <span className="font-medium">{categoryLabel(KHARCHA_CATEGORY)}</span>
+                  <span className="tabular-nums text-muted-foreground">{formatMoney(kharchaTotal)}</span>
+                </li>
+              </ul>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 lg:grid-cols-2">
+
         <Card className="rounded-2xl shadow-card">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
