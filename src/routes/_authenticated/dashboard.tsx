@@ -88,7 +88,24 @@ function DashboardPage() {
     [months, expenseRows, paymentRows],
   );
 
+  const categorySummaries = useMemo(
+    () => WORK_CATEGORIES.map((c) => summariseCategory(c, expenseRows, paymentRows)),
+    [expenseRows, paymentRows],
+  );
+  const categoryTotals = categorySummaries.reduce(
+    (a, c) => ({
+      finalized: a.finalized + c.finalized,
+      paid: a.paid + c.paid,
+      remaining: a.remaining + c.remaining,
+    }),
+    { finalized: 0, paid: 0, remaining: 0 },
+  );
+  const kharchaTotal = expenseRows
+    .filter((e) => e.category === KHARCHA_CATEGORY)
+    .reduce((a, e) => a + Number(e.amount ?? 0), 0);
+
   const byProject = useMemo(
+
     () =>
       projectRows
         .map((p) => ({
