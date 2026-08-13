@@ -92,53 +92,79 @@ function CategoryPaymentsPage() {
       {isLoading ? (
         <Skeleton className="h-64 rounded-2xl" />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {cards.map((c) => (
-            <Link
-              key={c.category}
-              to="/category-payments/$category"
-              params={{ category: c.category }}
-              className="block"
-            >
-              <Card className="h-full rounded-2xl shadow-card transition-colors hover:border-primary/40">
-                <CardContent className="space-y-3 p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-display text-base font-semibold">{categoryLabel(c.category)}</p>
-                    <span
-                      className={cn(
-                        "rounded-full border px-2.5 py-0.5 text-xs font-medium",
-                        PAY_STATUS_STYLES[c.status],
-                      )}
-                    >
-                      {PAY_STATUS_LABEL[c.status]}
-                    </span>
-                  </div>
-                  <dl className="grid grid-cols-3 gap-2 rounded-xl bg-muted/50 p-3 text-center">
-                    <div>
-                      <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Finalized</dt>
-                      <dd className="text-sm font-semibold tabular-nums">{formatMoney(c.finalized)}</dd>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {cards.map((c) => (
+              <Link
+                key={c.category}
+                to="/category-payments/$category"
+                params={{ category: c.category }}
+                className="block"
+              >
+                <Card className="h-full rounded-2xl shadow-card transition-colors hover:border-primary/40">
+                  <CardContent className="space-y-3 p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-display text-base font-semibold">{categoryLabel(c.category)}</p>
+                      <span
+                        className={cn(
+                          "rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                          PAY_STATUS_STYLES[c.status],
+                        )}
+                      >
+                        {PAY_STATUS_LABEL[c.status]}
+                      </span>
                     </div>
-                    <div>
-                      <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid</dt>
-                      <dd className="text-sm font-semibold tabular-nums text-success">{formatMoney(c.paid)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Remaining</dt>
-                      <dd className="text-sm font-semibold tabular-nums text-destructive">
-                        {formatMoney(c.remaining)}
-                      </dd>
-                    </div>
-                  </dl>
-                  <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                    {c.entries.length} entries · {c.history.length} payments
-                    <ArrowRight className="ml-auto h-4 w-4" />
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                    <dl className="grid grid-cols-3 gap-2 rounded-xl bg-muted/50 p-3 text-center">
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Finalized</dt>
+                        <dd className="text-sm font-semibold tabular-nums">{formatMoney(c.finalized)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid</dt>
+                        <dd className="text-sm font-semibold tabular-nums text-success">{formatMoney(c.paid)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Remaining</dt>
+                        <dd className="text-sm font-semibold tabular-nums text-destructive">
+                          {formatMoney(c.remaining)}
+                        </dd>
+                      </div>
+                    </dl>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      {c.entries.length} entries · {c.history.length} payments
+                      <ArrowRight className="ml-auto h-4 w-4" />
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          <Card className="rounded-2xl shadow-card">
+            <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
+              <div>
+                <p className="font-display text-base font-semibold">
+                  {categoryLabel(KHARCHA_CATEGORY)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {kharcha.length} entries · running site expenses (no pending tracking)
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-lg font-semibold tabular-nums">{formatMoney(kharchaTotal)}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadKharchaPdf(kharcha, projectName)}
+                >
+                  <Download className="h-4 w-4" /> PDF
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
+
     </div>
   );
 }
