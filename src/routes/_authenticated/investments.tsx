@@ -1,16 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Landmark, Pencil, Plus, Trash2, TrendingUp, Users } from "lucide-react";
+import {
+  Download,
+  FileText,
+  Landmark,
+  Pencil,
+  Plus,
+  Trash2,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { EmptyState } from "@/components/empty-state";
 import { InvestmentDialog } from "@/components/investment-dialog";
+import { AgreementDialog } from "@/components/agreement-dialog";
+import { AgreementPaymentDialog } from "@/components/agreement-payment-dialog";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDeleteRow, useInvestmentInvestors, useInvestments } from "@/lib/data";
-import { formatDate, formatMoney, type Investment } from "@/lib/domain";
+import {
+  useAgreementPayments,
+  useDeleteRow,
+  useInvestmentInvestors,
+  useInvestments,
+  usePropertyAgreements,
+} from "@/lib/data";
+import {
+  formatDate,
+  formatMoney,
+  methodLabel,
+  type Investment,
+  type PropertyAgreement,
+} from "@/lib/domain";
+import { downloadAgreementPdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/investments")({
   head: () => ({
@@ -33,10 +57,20 @@ export const Route = createFileRoute("/_authenticated/investments")({
 function InvestmentsPage() {
   const { data: investments = [], isLoading } = useInvestments();
   const { data: investors = [] } = useInvestmentInvestors();
+  const { data: agreements = [] } = usePropertyAgreements();
+  const { data: agreementPayments = [] } = useAgreementPayments();
   const remove = useDeleteRow("investments", "Investment deleted");
+  const removeAgreement = useDeleteRow("property_agreements", "Agreement deleted");
+  const removeAgreementPayment = useDeleteRow("agreement_payments", "Payment deleted");
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Investment | null>(null);
+  const [agreementOpen, setAgreementOpen] = useState(false);
+  const [editingAgreement, setEditingAgreement] = useState<PropertyAgreement | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
+  const [payAgreement, setPayAgreement] = useState<PropertyAgreement | null>(null);
+  const [payRemaining, setPayRemaining] = useState(0);
+
 
   const totals = useMemo(() => {
     const invested = investments.reduce((a, i) => a + Number(i.purchase_amount ?? 0), 0);
@@ -208,7 +242,163 @@ function InvestmentsPage() {
         </div>
       )}
 
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="font-display text-xl font-semibold">Advance Payment (Agreements)</h2>
+            <p className="text-sm text-muted-foreground">
+              Property agreements with total amount, advances paid and balance.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setEditingAgreement(null);
+              setAgreementOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" /> Add agreement
+          </Button>
+        </div>
+
+        {agreements.length === 0 ? (
+          <EmptyState
+            icon={FileText}
+            title="No agreements yet"
+            description="Record an agreement and track the advance payments made against it."
+          />
+        ) : (
+          <div className="space-y-4">
+            {agreements.map((ag) => {
+              const rows = agreementPayments.filter((p) => p.agreement_id === ag.id);
+              const total = Number(ag.total_amount ?? 0);
+              const paid = rows.reduce((a, p) => a + Number(p.amount ?? 0), 0);
+              const balance = Math.max(total - paid, 0);
+              return (
+                <Card key={ag.id} className="rounded-2xl shadow-card">
+                  <CardContent className="space-y-4 p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="font-display text-lg font-semibold">{ag.property_name}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {ag.description || "—"} · {formatDate(ag.agreement_date)}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setPayAgreement(ag);
+                            setPayRemaining(balance);
+                            setPayOpen(true);
+                          }}
+                        >
+                          <Plus className="h-4 w-4" /> Advance
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadAgreementPdf(ag, rows)}
+                        >
+                          <Download className="h-4 w-4" /> PDF
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Edit agreement"
+                          onClick={() => {
+                            setEditingAgreement(ag);
+                            setAgreementOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <ConfirmDelete
+                          title="Delete this agreement?"
+                          description="Its advance payment history will also be removed."
+                          onConfirm={() => removeAgreement.mutate(ag.id)}
+                          trigger={
+                            <Button variant="ghost" size="icon" aria-label="Delete agreement">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <dl className="grid gap-2 rounded-xl bg-muted/50 p-3 text-center sm:grid-cols-3">
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Total</dt>
+                        <dd className="text-sm font-semibold tabular-nums">{formatMoney(total)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid</dt>
+                        <dd className="text-sm font-semibold tabular-nums text-success">{formatMoney(paid)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Balance</dt>
+                        <dd className="text-sm font-semibold tabular-nums text-destructive">
+                          {formatMoney(balance)}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    {rows.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No advance payments yet.</p>
+                    ) : (
+                      <ul className="divide-y divide-border">
+                        {rows.map((p) => (
+                          <li key={p.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                            <div className="min-w-0">
+                              <p className="truncate font-medium">{formatDate(p.payment_date)}</p>
+                              <p className="truncate text-xs text-muted-foreground">
+                                {methodLabel(p.payment_method)}
+                                {p.notes ? ` · ${p.notes}` : ""}
+                              </p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-1">
+                              <span className="font-semibold">{formatMoney(p.amount)}</span>
+                              <ConfirmDelete
+                                title="Delete this payment?"
+                                onConfirm={() => removeAgreementPayment.mutate(p.id)}
+                                trigger={
+                                  <Button variant="ghost" size="icon" aria-label="Delete payment">
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                }
+                              />
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {ag.notes ? (
+                      <p className="whitespace-pre-wrap text-sm text-muted-foreground">{ag.notes}</p>
+                    ) : null}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       <InvestmentDialog open={open} onOpenChange={setOpen} investment={editing} />
+      <AgreementDialog
+        open={agreementOpen}
+        onOpenChange={setAgreementOpen}
+        agreement={editingAgreement}
+        investments={investments}
+      />
+      <AgreementPaymentDialog
+        open={payOpen}
+        onOpenChange={setPayOpen}
+        agreement={payAgreement}
+        remaining={payRemaining}
+      />
+
     </div>
   );
 }
