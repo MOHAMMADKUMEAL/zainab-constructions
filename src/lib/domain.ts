@@ -31,6 +31,11 @@ export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: "tiles_fitter", label: "Tiles Fitter" },
   { value: "tiles_material", label: "Tiles Material" },
   { value: "tiles", label: "Tiles" },
+  { value: "grill", label: "Grill" },
+  { value: "pop", label: "POP" },
+  { value: "fabrication", label: "Fabrication" },
+  { value: "carpenter", label: "Carpenter (Badagi)" },
+  { value: "kharcha", label: "Kharcha" },
   { value: "transport", label: "Transport" },
   { value: "other", label: "Other" },
 ];
@@ -44,7 +49,15 @@ export const WORK_CATEGORIES: ExpenseCategory[] = [
   "painter",
   "tiles_fitter",
   "tiles_material",
+  "grill",
+  "pop",
+  "fabrication",
+  "carpenter",
 ];
+
+/** Kharcha is a plain running-expense category (no finalized / remaining tracking). */
+export const KHARCHA_CATEGORY: ExpenseCategory = "kharcha";
+
 
 
 export const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
