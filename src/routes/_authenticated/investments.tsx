@@ -361,6 +361,8 @@ function InvestmentsPage() {
                               <span className="font-semibold">{formatMoney(p.amount)}</span>
                               <ConfirmDelete
                                 title="Delete this payment?"
+                                description="This advance payment entry will be removed."
+
                                 onConfirm={() => removeAgreementPayment.mutate(p.id)}
                                 trigger={
                                   <Button variant="ghost" size="icon" aria-label="Delete payment">
