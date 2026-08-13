@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowRight, LayoutGrid } from "lucide-react";
+import { ArrowRight, Download, LayoutGrid } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -12,9 +13,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/stat-card";
 import { useExpenses, usePayments, useProjects } from "@/lib/data";
-import { WORK_CATEGORIES, categoryLabel, formatMoney } from "@/lib/domain";
+import { KHARCHA_CATEGORY, WORK_CATEGORIES, categoryLabel, formatMoney } from "@/lib/domain";
 import { PAY_STATUS_LABEL, PAY_STATUS_STYLES, summariseCategory } from "@/lib/pending";
+import { downloadKharchaPdf } from "@/lib/pdf";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/category-payments/")({
   head: () => ({
