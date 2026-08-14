@@ -53,17 +53,30 @@ function AuthPage() {
   const signUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${window.location.origin}/dashboard` },
     });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
-    toast.success("Account created. You can sign in now.");
+    if (data.session) {
+      setLoading(false);
+      toast.success("Account created");
+      navigate({ to: "/dashboard", replace: true });
+      return;
+    }
+    // Auto-confirm is on, so sign the new user straight in.
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (signInError) {
+      toast.success("Account created. You can sign in now.");
+      return;
+    }
+    navigate({ to: "/dashboard", replace: true });
   };
 
   const google = async () => {
