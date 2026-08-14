@@ -44,17 +44,45 @@ const empty = {
   notes: "",
 };
 
+const emptyAgreement = {
+  total_amount: "",
+  agreement_date: new Date().toISOString().slice(0, 10),
+  advance_amount: "",
+  payment_method: "cash" as PaymentMethod,
+  notes: "",
+};
+
 export function InvestmentDialog({ open, onOpenChange, investment }: Props) {
   const qc = useQueryClient();
   const { data: allInvestors = [] } = useInvestmentInvestors();
+  const { data: allAgreements = [] } = usePropertyAgreements();
+  const { data: allAgreementPayments = [] } = useAgreementPayments();
   const [form, setForm] = useState(empty);
   const [investors, setInvestors] = useState<InvestorRow[]>([{ name: "", amount: "" }]);
+  const [hasAgreement, setHasAgreement] = useState(false);
+  const [agreement, setAgreement] = useState(emptyAgreement);
   const [saving, setSaving] = useState(false);
 
   const existing = useMemo(
     () => allInvestors.filter((i) => i.investment_id === investment?.id),
     [allInvestors, investment?.id],
   );
+
+  const existingAgreement = useMemo(
+    () => (investment ? allAgreements.find((a) => a.investment_id === investment.id) ?? null : null),
+    [allAgreements, investment],
+  );
+
+  const agreementPaid = useMemo(
+    () =>
+      existingAgreement
+        ? allAgreementPayments
+            .filter((p) => p.agreement_id === existingAgreement.id)
+            .reduce((a, p) => a + Number(p.amount ?? 0), 0)
+        : 0,
+    [allAgreementPayments, existingAgreement],
+  );
+
 
   useEffect(() => {
     if (!open) return;
