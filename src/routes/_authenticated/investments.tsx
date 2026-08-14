@@ -52,16 +52,11 @@ function InvestmentsPage() {
   const { data: agreements = [] } = usePropertyAgreements();
   const { data: agreementPayments = [] } = useAgreementPayments();
   const remove = useDeleteRow("investments", "Investment deleted");
-  const removeAgreement = useDeleteRow("property_agreements", "Agreement deleted");
   const removeAgreementPayment = useDeleteRow("agreement_payments", "Payment deleted");
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Investment | null>(null);
-  const [agreementOpen, setAgreementOpen] = useState(false);
-  const [editingAgreement, setEditingAgreement] = useState<PropertyAgreement | null>(null);
-  const [payOpen, setPayOpen] = useState(false);
-  const [payAgreement, setPayAgreement] = useState<PropertyAgreement | null>(null);
-  const [payRemaining, setPayRemaining] = useState(0);
+
 
 
   const totals = useMemo(() => {
