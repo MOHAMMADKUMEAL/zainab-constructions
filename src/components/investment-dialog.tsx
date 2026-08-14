@@ -346,6 +346,101 @@ export function InvestmentDialog({ open, onOpenChange, investment }: Props) {
             ))}
           </div>
 
+          <div className="space-y-3 rounded-xl border border-border p-3">
+            <div className="flex items-center gap-2.5">
+              <Checkbox
+                id="inv-agreement"
+                checked={hasAgreement}
+                onCheckedChange={(v) => setHasAgreement(v === true)}
+              />
+              <Label htmlFor="inv-agreement" className="cursor-pointer">
+                Advance payment agreement
+              </Label>
+            </div>
+            {hasAgreement ? (
+              <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ag-total">Total agreed amount (₹)</Label>
+                    <Input
+                      id="ag-total"
+                      type="number"
+                      min="0"
+                      value={agreement.total_amount}
+                      onChange={(e) => setAgreement({ ...agreement, total_amount: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ag-date">Agreement date</Label>
+                    <Input
+                      id="ag-date"
+                      type="date"
+                      value={agreement.agreement_date}
+                      onChange={(e) =>
+                        setAgreement({ ...agreement, agreement_date: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ag-advance">
+                      {existingAgreement ? "Add advance payment (₹)" : "Advance paid (₹)"}
+                    </Label>
+                    <Input
+                      id="ag-advance"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={agreement.advance_amount}
+                      onChange={(e) =>
+                        setAgreement({ ...agreement, advance_amount: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Payment method</Label>
+                    <Select
+                      value={agreement.payment_method}
+                      onValueChange={(v) =>
+                        setAgreement({ ...agreement, payment_method: v as PaymentMethod })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAYMENT_METHODS.map((m) => (
+                          <SelectItem key={m.value} value={m.value}>
+                            {m.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Already paid {formatMoney(agreementPaid)} · Balance{" "}
+                  {formatMoney(
+                    Math.max(
+                      Number(agreement.total_amount || 0) -
+                        agreementPaid -
+                        Number(agreement.advance_amount || 0),
+                      0,
+                    ),
+                  )}
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="ag-notes">Agreement notes</Label>
+                  <Textarea
+                    id="ag-notes"
+                    rows={2}
+                    value={agreement.notes}
+                    onChange={(e) => setAgreement({ ...agreement, notes: e.target.value })}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="inv-notes">Notes</Label>
             <Textarea
