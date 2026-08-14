@@ -13,9 +13,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useInvestmentInvestors } from "@/lib/data";
-import { formatMoney, type Investment } from "@/lib/domain";
+import { useAgreementPayments, useInvestmentInvestors, usePropertyAgreements } from "@/lib/data";
+import { PAYMENT_METHODS, formatMoney, type Investment, type PaymentMethod } from "@/lib/domain";
 import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
