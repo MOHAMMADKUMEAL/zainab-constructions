@@ -13,8 +13,6 @@ import {
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { EmptyState } from "@/components/empty-state";
 import { InvestmentDialog } from "@/components/investment-dialog";
-import { AgreementDialog } from "@/components/agreement-dialog";
-import { AgreementPaymentDialog } from "@/components/agreement-payment-dialog";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,13 +25,7 @@ import {
   useInvestments,
   usePropertyAgreements,
 } from "@/lib/data";
-import {
-  formatDate,
-  formatMoney,
-  methodLabel,
-  type Investment,
-  type PropertyAgreement,
-} from "@/lib/domain";
+import { formatDate, formatMoney, methodLabel, type Investment } from "@/lib/domain";
 import { downloadAgreementPdf } from "@/lib/pdf";
 
 export const Route = createFileRoute("/_authenticated/investments")({
