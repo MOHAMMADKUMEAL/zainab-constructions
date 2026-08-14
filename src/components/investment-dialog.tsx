@@ -169,8 +169,56 @@ export function InvestmentDialog({ open, onOpenChange, investment }: Props) {
         if (error) throw error;
       }
 
+      if (hasAgreement) {
+        const agreementValues = {
+          investment_id: investmentId!,
+          property_name: form.title.trim(),
+          description: form.location.trim(),
+          agreement_date: agreement.agreement_date || new Date().toISOString().slice(0, 10),
+          total_amount: Number(agreement.total_amount || 0),
+          payment_method: agreement.payment_method,
+          notes: agreement.notes.trim(),
+        };
+        let agreementId = existingAgreement?.id;
+        if (agreementId) {
+          const { error } = await supabase
+            .from("property_agreements")
+            .update(agreementValues)
+            .eq("id", agreementId);
+          if (error) throw error;
+        } else {
+          const { data, error } = await supabase
+            .from("property_agreements")
+            .insert(agreementValues)
+            .select("id")
+            .single();
+          if (error) throw error;
+          agreementId = data.id;
+        }
+
+        const advance = Number(agreement.advance_amount || 0);
+        if (advance > 0) {
+          const { error } = await supabase.from("agreement_payments").insert({
+            agreement_id: agreementId!,
+            amount: advance,
+            payment_date: agreement.agreement_date || new Date().toISOString().slice(0, 10),
+            payment_method: agreement.payment_method,
+            notes: "Advance payment",
+          });
+          if (error) throw error;
+        }
+      } else if (existingAgreement) {
+        const { error } = await supabase
+          .from("property_agreements")
+          .delete()
+          .eq("id", existingAgreement.id);
+        if (error) throw error;
+      }
+
       qc.invalidateQueries({ queryKey: ["investments"] });
       qc.invalidateQueries({ queryKey: ["investment_investors"] });
+      qc.invalidateQueries({ queryKey: ["property_agreements"] });
+      qc.invalidateQueries({ queryKey: ["agreement_payments"] });
       toast.success(investment ? "Investment updated" : "Investment added");
       onOpenChange(false);
     } catch (err) {
