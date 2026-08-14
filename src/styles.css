@@ -193,3 +193,23 @@ input[type="time"] {
   opacity: 0.85;
   cursor: pointer;
 }
+
+/* Landing hero: construction progress slideshow (foundation → finished home) */
+@keyframes hero-slide-fade {
+  0% { opacity: 0; transform: scale(1.04); }
+  4% { opacity: 1; }
+  25% { opacity: 1; transform: scale(1.16); }
+  30% { opacity: 0; transform: scale(1.18); }
+  100% { opacity: 0; transform: scale(1.04); }
+}
+
+.hero-slide {
+  opacity: 0;
+  animation: hero-slide-fade 24s linear infinite;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide { animation: none; }
+  .hero-slide:first-child { opacity: 1; }
+}

@@ -13,9 +13,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useInvestmentInvestors } from "@/lib/data";
-import { formatMoney, type Investment } from "@/lib/domain";
+import { useAgreementPayments, useInvestmentInvestors, usePropertyAgreements } from "@/lib/data";
+import { PAYMENT_METHODS, formatMoney, type Investment, type PaymentMethod } from "@/lib/domain";
 import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
@@ -36,17 +44,45 @@ const empty = {
   notes: "",
 };
 
+const emptyAgreement = {
+  total_amount: "",
+  agreement_date: new Date().toISOString().slice(0, 10),
+  advance_amount: "",
+  payment_method: "cash" as PaymentMethod,
+  notes: "",
+};
+
 export function InvestmentDialog({ open, onOpenChange, investment }: Props) {
   const qc = useQueryClient();
   const { data: allInvestors = [] } = useInvestmentInvestors();
+  const { data: allAgreements = [] } = usePropertyAgreements();
+  const { data: allAgreementPayments = [] } = useAgreementPayments();
   const [form, setForm] = useState(empty);
   const [investors, setInvestors] = useState<InvestorRow[]>([{ name: "", amount: "" }]);
+  const [hasAgreement, setHasAgreement] = useState(false);
+  const [agreement, setAgreement] = useState(emptyAgreement);
   const [saving, setSaving] = useState(false);
 
   const existing = useMemo(
     () => allInvestors.filter((i) => i.investment_id === investment?.id),
     [allInvestors, investment?.id],
   );
+
+  const existingAgreement = useMemo(
+    () => (investment ? allAgreements.find((a) => a.investment_id === investment.id) ?? null : null),
+    [allAgreements, investment],
+  );
+
+  const agreementPaid = useMemo(
+    () =>
+      existingAgreement
+        ? allAgreementPayments
+            .filter((p) => p.agreement_id === existingAgreement.id)
+            .reduce((a, p) => a + Number(p.amount ?? 0), 0)
+        : 0,
+    [allAgreementPayments, existingAgreement],
+  );
+
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +104,19 @@ export function InvestmentDialog({ open, onOpenChange, investment }: Props) {
         ? existing.map((i) => ({ name: i.investor_name, amount: String(i.amount ?? "") }))
         : [{ name: "", amount: "" }],
     );
-  }, [open, investment, existing]);
+    setHasAgreement(Boolean(existingAgreement));
+    setAgreement(
+      existingAgreement
+        ? {
+            total_amount: String(existingAgreement.total_amount ?? ""),
+            agreement_date: existingAgreement.agreement_date ?? emptyAgreement.agreement_date,
+            advance_amount: "",
+            payment_method: existingAgreement.payment_method,
+            notes: existingAgreement.notes ?? "",
+          }
+        : emptyAgreement,
+    );
+  }, [open, investment, existing, existingAgreement]);
 
   const set = (key: keyof typeof empty, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -121,8 +169,56 @@ export function InvestmentDialog({ open, onOpenChange, investment }: Props) {
         if (error) throw error;
       }
 
+      if (hasAgreement) {
+        const agreementValues = {
+          investment_id: investmentId!,
+          property_name: form.title.trim(),
+          description: form.location.trim(),
+          agreement_date: agreement.agreement_date || new Date().toISOString().slice(0, 10),
+          total_amount: Number(agreement.total_amount || 0),
+          payment_method: agreement.payment_method,
+          notes: agreement.notes.trim(),
+        };
+        let agreementId = existingAgreement?.id;
+        if (agreementId) {
+          const { error } = await supabase
+            .from("property_agreements")
+            .update(agreementValues)
+            .eq("id", agreementId);
+          if (error) throw error;
+        } else {
+          const { data, error } = await supabase
+            .from("property_agreements")
+            .insert(agreementValues)
+            .select("id")
+            .single();
+          if (error) throw error;
+          agreementId = data.id;
+        }
+
+        const advance = Number(agreement.advance_amount || 0);
+        if (advance > 0) {
+          const { error } = await supabase.from("agreement_payments").insert({
+            agreement_id: agreementId!,
+            amount: advance,
+            payment_date: agreement.agreement_date || new Date().toISOString().slice(0, 10),
+            payment_method: agreement.payment_method,
+            notes: "Advance payment",
+          });
+          if (error) throw error;
+        }
+      } else if (existingAgreement) {
+        const { error } = await supabase
+          .from("property_agreements")
+          .delete()
+          .eq("id", existingAgreement.id);
+        if (error) throw error;
+      }
+
       qc.invalidateQueries({ queryKey: ["investments"] });
       qc.invalidateQueries({ queryKey: ["investment_investors"] });
+      qc.invalidateQueries({ queryKey: ["property_agreements"] });
+      qc.invalidateQueries({ queryKey: ["agreement_payments"] });
       toast.success(investment ? "Investment updated" : "Investment added");
       onOpenChange(false);
     } catch (err) {
@@ -248,6 +344,101 @@ export function InvestmentDialog({ open, onOpenChange, investment }: Props) {
                 </Button>
               </div>
             ))}
+          </div>
+
+          <div className="space-y-3 rounded-xl border border-border p-3">
+            <div className="flex items-center gap-2.5">
+              <Checkbox
+                id="inv-agreement"
+                checked={hasAgreement}
+                onCheckedChange={(v) => setHasAgreement(v === true)}
+              />
+              <Label htmlFor="inv-agreement" className="cursor-pointer">
+                Advance payment agreement
+              </Label>
+            </div>
+            {hasAgreement ? (
+              <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="ag-total">Total agreed amount (₹)</Label>
+                    <Input
+                      id="ag-total"
+                      type="number"
+                      min="0"
+                      value={agreement.total_amount}
+                      onChange={(e) => setAgreement({ ...agreement, total_amount: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ag-date">Agreement date</Label>
+                    <Input
+                      id="ag-date"
+                      type="date"
+                      value={agreement.agreement_date}
+                      onChange={(e) =>
+                        setAgreement({ ...agreement, agreement_date: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ag-advance">
+                      {existingAgreement ? "Add advance payment (₹)" : "Advance paid (₹)"}
+                    </Label>
+                    <Input
+                      id="ag-advance"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={agreement.advance_amount}
+                      onChange={(e) =>
+                        setAgreement({ ...agreement, advance_amount: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Payment method</Label>
+                    <Select
+                      value={agreement.payment_method}
+                      onValueChange={(v) =>
+                        setAgreement({ ...agreement, payment_method: v as PaymentMethod })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAYMENT_METHODS.map((m) => (
+                          <SelectItem key={m.value} value={m.value}>
+                            {m.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Already paid {formatMoney(agreementPaid)} · Balance{" "}
+                  {formatMoney(
+                    Math.max(
+                      Number(agreement.total_amount || 0) -
+                        agreementPaid -
+                        Number(agreement.advance_amount || 0),
+                      0,
+                    ),
+                  )}
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="ag-notes">Agreement notes</Label>
+                  <Textarea
+                    id="ag-notes"
+                    rows={2}
+                    value={agreement.notes}
+                    onChange={(e) => setAgreement({ ...agreement, notes: e.target.value })}
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="space-y-2">
