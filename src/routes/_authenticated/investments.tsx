@@ -232,6 +232,96 @@ function InvestmentsPage() {
                     )}
                   </div>
 
+                  {(() => {
+                    const ag = agreements.find((a) => a.investment_id === inv.id);
+                    if (!ag) return null;
+                    const payRows = agreementPayments.filter((p) => p.agreement_id === ag.id);
+                    const total = Number(ag.total_amount ?? 0);
+                    const paid = payRows.reduce((a, p) => a + Number(p.amount ?? 0), 0);
+                    const balance = Math.max(total - paid, 0);
+                    return (
+                      <div className="space-y-3 rounded-xl border border-border p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                            <FileText className="h-3.5 w-3.5" /> Advance payment agreement ·{" "}
+                            {formatDate(ag.agreement_date)}
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadAgreementPdf(ag, payRows)}
+                          >
+                            <Download className="h-4 w-4" /> PDF
+                          </Button>
+                        </div>
+                        <dl className="grid gap-2 rounded-lg bg-muted/50 p-3 text-center sm:grid-cols-3">
+                          <div>
+                            <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                              Total
+                            </dt>
+                            <dd className="text-sm font-semibold tabular-nums">
+                              {formatMoney(total)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                              Paid
+                            </dt>
+                            <dd className="text-sm font-semibold tabular-nums text-success">
+                              {formatMoney(paid)}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                              Balance
+                            </dt>
+                            <dd className="text-sm font-semibold tabular-nums text-destructive">
+                              {formatMoney(balance)}
+                            </dd>
+                          </div>
+                        </dl>
+                        {payRows.length ? (
+                          <ul className="divide-y divide-border">
+                            {payRows.map((p) => (
+                              <li
+                                key={p.id}
+                                className="flex items-center justify-between gap-3 py-2 text-sm"
+                              >
+                                <div className="min-w-0">
+                                  <p className="truncate font-medium">
+                                    {formatDate(p.payment_date)}
+                                  </p>
+                                  <p className="truncate text-xs text-muted-foreground">
+                                    {methodLabel(p.payment_method)}
+                                    {p.notes ? ` · ${p.notes}` : ""}
+                                  </p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1">
+                                  <span className="font-semibold">{formatMoney(p.amount)}</span>
+                                  <ConfirmDelete
+                                    title="Delete this payment?"
+                                    description="This advance payment entry will be removed."
+                                    onConfirm={() => removeAgreementPayment.mutate(p.id)}
+                                    trigger={
+                                      <Button variant="ghost" size="icon" aria-label="Delete payment">
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                    }
+                                  />
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        {ag.notes ? (
+                          <p className="whitespace-pre-wrap text-xs text-muted-foreground">
+                            {ag.notes}
+                          </p>
+                        ) : null}
+                      </div>
+                    );
+                  })()}
+
                   {inv.notes ? (
                     <p className="whitespace-pre-wrap text-sm text-muted-foreground">{inv.notes}</p>
                   ) : null}
