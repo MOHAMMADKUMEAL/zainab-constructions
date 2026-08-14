@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useProjects, useSaveRow } from "@/lib/data";
+import { isAreaPriced } from "@/lib/pending";
 import { EXPENSE_CATEGORIES, formatMoney, type Expense, type ExpenseCategory } from "@/lib/domain";
 
 type Props = {
@@ -67,7 +68,7 @@ export function PendingPaymentDialog({
     setRate(expense?.rate_per_sqft != null ? String(expense.rate_per_sqft) : "");
   }, [open, expense, defaultProjectId, defaultCategory]);
 
-  const isGoundi = category === "goundi";
+  const isGoundi = isAreaPriced(category);
   const area = Number(length || 0) * Number(width || 0);
   const computed = area * Number(rate || 0);
   const finalized = isGoundi && computed > 0 ? computed : Number(amount || 0);
@@ -139,7 +140,7 @@ export function PendingPaymentDialog({
           {isGoundi ? (
             <div className="space-y-3 rounded-xl border border-border p-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Goundi rate calculation
+                {category === "goundi" ? "Goundi" : "Shentring Mestri"} rate calculation
               </p>
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-2">
