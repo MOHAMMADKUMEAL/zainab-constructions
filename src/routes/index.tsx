@@ -146,6 +146,18 @@ function Portfolio() {
       <main className="mx-auto max-w-6xl px-5 pb-20">
         {/* Hero */}
         <section className="relative mt-6 overflow-hidden rounded-3xl border border-border/70 bg-card px-6 py-14 shadow-card sm:px-12 sm:py-20">
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            {[work3.url, work2.url, work4.url, work1.url].map((src, i) => (
+              <img
+                key={src}
+                src={src}
+                alt=""
+                className="hero-slide absolute inset-0 h-full w-full object-cover"
+                style={{ animationDelay: `${i * 6}s` }}
+              />
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-r from-card via-card/90 to-card/50" />
+          </div>
           <div className="surface-grid pointer-events-none absolute inset-0 opacity-40" />
           <div className="relative max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-foreground dark:text-accent">
