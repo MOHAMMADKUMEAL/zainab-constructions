@@ -104,7 +104,19 @@ export function InvestmentDialog({ open, onOpenChange, investment }: Props) {
         ? existing.map((i) => ({ name: i.investor_name, amount: String(i.amount ?? "") }))
         : [{ name: "", amount: "" }],
     );
-  }, [open, investment, existing]);
+    setHasAgreement(Boolean(existingAgreement));
+    setAgreement(
+      existingAgreement
+        ? {
+            total_amount: String(existingAgreement.total_amount ?? ""),
+            agreement_date: existingAgreement.agreement_date ?? emptyAgreement.agreement_date,
+            advance_amount: "",
+            payment_method: existingAgreement.payment_method,
+            notes: existingAgreement.notes ?? "",
+          }
+        : emptyAgreement,
+    );
+  }, [open, investment, existing, existingAgreement]);
 
   const set = (key: keyof typeof empty, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
