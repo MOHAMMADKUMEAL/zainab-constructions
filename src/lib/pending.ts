@@ -17,7 +17,12 @@ export const PAY_STATUS_STYLES: Record<PayStatus, string> = {
 /** Payments made out to a vendor / worker (as opposed to money received from a client). */
 export const isOutgoing = (p: Payment) => p.direction === "out";
 
-/** Goundi is priced by area: length x width x rate. */
+/** Categories priced by area: length x width x rate. */
+export const AREA_PRICED_CATEGORIES = ["goundi", "shentring_mestri"] as const;
+
+export const isAreaPriced = (category: string) =>
+  (AREA_PRICED_CATEGORIES as readonly string[]).includes(category);
+
 export function goundiArea(e: Pick<Expense, "plot_length" | "plot_width">): number {
   const l = Number(e.plot_length ?? 0);
   const w = Number(e.plot_width ?? 0);
